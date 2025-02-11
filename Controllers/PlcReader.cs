@@ -1,6 +1,8 @@
-﻿using Microsoft.Extensions.Options; // Dodaj ten using
-using TwinCAT.Ads; // Dodaj ten using (lub odpowiedni dla twojej biblioteki ADS)
+﻿using Microsoft.Extensions.Options;
+using TwinCAT.Ads;
 using System;
+using System.Collections.Generic; // Dodaj ten using
+using WebApplication2.Models; // Dodaj ten using
 
 namespace PlcVariableReader
 {
@@ -11,12 +13,12 @@ namespace PlcVariableReader
         private readonly string _amsNetId;
         private readonly int _port;
 
-        public PlcReader(IOptions<PlcConfiguration> plcConfiguration) // Wstrzykiwanie IOptions
+        public PlcReader(IOptions<PlcConfiguration> plcConfiguration)
         {
             _amsNetId = plcConfiguration.Value.IpAddress;
             _port = plcConfiguration.Value.Port;
 
-            if (_amsNetId == null || _port == 0) // Sprawdzamy, czy konfiguracja jest poprawna
+            if (_amsNetId == null || _port == 0)
             {
                 throw new ArgumentNullException("Adres IP i/lub port PLC nie zostały skonfigurowane.");
             }
@@ -33,13 +35,12 @@ namespace PlcVariableReader
             }
         }
 
-
-        public bool ReadBoolVariable(string variableName)
+        public object ReadVariable(string variableName)
         {
             try
             {
                 var handle = _adsClient.CreateVariableHandle(variableName);
-                bool value = (bool)_adsClient.ReadAny(handle, typeof(bool));
+                object value = _adsClient.ReadAny(handle, GetTypeForVariable(variableName)); // Użyj GetTypeForVariable
                 _adsClient.DeleteVariableHandle(handle);
                 return value;
             }
@@ -48,25 +49,51 @@ namespace PlcVariableReader
                 throw new PlcException($"Błąd odczytu zmiennej '{variableName}': {ex.Message}", ex);
             }
         }
-        public int ReadIntVariable(string variableName)
-        {
-            Console.WriteLine($"Próba odczytu zmiennej: {variableName}"); // Log
 
+        public void WriteVariable(string variableName, object value)
+        {
             try
             {
                 var handle = _adsClient.CreateVariableHandle(variableName);
-                Console.WriteLine($"Utworzono handle dla zmiennej: {variableName}"); // Log
-                int value = (int)_adsClient.ReadAny(handle, typeof(int));
+
+                // Dodajemy sprawdzenie typu i konwersję (opcjonalne, ale zalecane)
+                if (value != null && value.GetType() == GetTypeForVariable(variableName))
+                {
+                    _adsClient.WriteAny(handle, value);
+                }
+                else
+                {
+                    throw new ArgumentException($"Niepoprawny typ wartości dla zmiennej '{variableName}'. Oczekiwano {GetTypeForVariable(variableName)} a otrzymano {(value != null ? value.GetType() : "null")}.");
+                }
+
                 _adsClient.DeleteVariableHandle(handle);
-                Console.WriteLine($"Odczytano wartość zmiennej '{variableName}': {value}"); // Log
-                return value;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Błąd odczytu zmiennej '{variableName}': {ex.Message}"); // Log
-                throw new PlcException($"Błąd odczytu zmiennej '{variableName}': {ex.Message}", ex);
+                throw new PlcException($"Błąd zapisu zmiennej '{variableName}': {ex.Message}", ex);
             }
         }
+
+
+        // Dodajemy metodę GetTypeForVariable
+        private Type GetTypeForVariable(string variableName)
+        {
+            if (variableName == "MyGVL.MyBoolVariable")
+            {
+                return typeof(bool);
+            }
+            else if (variableName == "MyGVL.iCounter")
+            {
+                return typeof(int);
+            }
+            // ... inne zmienne
+            else
+            {
+                return typeof(object); // Lub rzuć wyjątek
+            }
+        }
+
+
         public void Dispose()
         {
             Dispose(true);

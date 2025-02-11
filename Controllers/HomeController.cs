@@ -29,8 +29,11 @@ namespace WebApplication2.Controllers
 
             try
             {
-                bool myBoolValue = _plcReader.ReadBoolVariable("MyGVL.MyBoolVariable");
-                int myIntValue = _plcReader.ReadIntVariable("MyGVL.iCounter");
+                object boolValue = _plcReader.ReadVariable("MyGVL.MyBoolVariable");
+                bool myBoolValue = boolValue != null ? (bool)boolValue : false; // Domyślślna wartość false
+
+                object intValue = _plcReader.ReadVariable("MyGVL.iCounter");
+                int myIntValue = intValue != null ? (int)intValue : 0; // Domyślna wartość 0
 
                 ViewData["MyBoolValue"] = myBoolValue;
                 ViewData["MyIntValue"] = myIntValue;

@@ -13,8 +13,8 @@
     </div>
 </div>
 
-<h1>Wartość MyBoolVariable z PLC: <span id="wartosc-zmiennej">@ViewData["MyBoolValue"]</span></h1>
-<h1>Wartość iCounter z PLC: <span id="wartosc-icounter">@ViewData["MyIntValue"]</span></h1>
+<div id="zmienne">
+</div>
 
 <div id="error-message" style="display:none; color:red;"></div>
 
@@ -31,40 +31,67 @@
             connection.start()
                 .then(() => {
                     console.log("Połączono z Hubem.");
+                    // Wywołujemy funkcję odczytu zmiennych po połączeniu
+                    odczytajZmienne();
                 })
                 .catch(err => console.error("Błąd połączenia:", err));
 
-            connection.on("OtrzymajDane", function (boolValue, intValue) {
-                console.log("Odebrano dane:", boolValue, intValue);
+            connection.on("ZmienneOdczytane", function (zmienne) {
+                console.log("Odebrano zmienne:", zmienne);
+                $("#zmienne").empty(); // Czyścimy poprzednie wartości
 
-                $("#wartosc-zmiennej").text(boolValue);
-                console.log("Zaktualizowano #wartosc-zmiennej:", boolValue);
+                for (const nazwa in zmienne) {
+                    const wartosc = zmienne[nazwa];
+                    let typ = typeof wartosc; // Określamy typ zmiennej
 
-                $("#wartosc-icounter").text(intValue);
-                console.log("Zaktualizowano #wartosc-icounter:", intValue);
+                    let element;
+                    if (typ === "boolean") {
+                        element = $(`<p>${nazwa}: <input type="checkbox" id="zmienna-${nazwa}" ${wartosc ? "checked" : ""} /></p>`);
+                        element.find("input").change(function () {
+                            zapiszZmienne({ [nazwa]: $(this).is(":checked") });
+                        });
+                    } else {
+                        element = $(`<p>${nazwa}: <span id="wartosc-${nazwa}">${wartosc}</span></p>`);
+                    }
+
+                    $("#zmienne").append(element);
+                }
 
                 $("#error-message").hide();
             });
 
-            connection.on("BladOdczytu", function (error) {
-                console.error("Błąd odczytu z PLC:", error);
-                $('#wartosc-zmiennej').text("Błąd odczytu");
-                $('#wartosc-icounter').text("Błąd odczytu");
-                $('#error-message').text(error);
-                $('#error-message').show();
+            connection.on("ZmiennaZapisana", function (nazwa, wartosc) {
+                console.log("Zmienna zapisana:", nazwa, wartosc);
+                $("#wartosc-" + nazwa).text(wartosc); // Aktualizujemy wartość w widoku
             });
 
-            function aktualizujDane() {
-                connection.invoke("AktualizujDane", "TwojaGrupa")
-                    .catch(err => console.error("Błąd wywołania:", err));
+            connection.on("BladOdczytu", function (nazwa, error) {
+                console.error(`Błąd odczytu zmiennej ${nazwa} z PLC:`, error);
+                $("#error-message").text(`Błąd odczytu zmiennej ${nazwa}: ${error}`);
+                $("#error-message").show();
+            });
+
+            connection.on("BladZapisu", function (nazwa, error) {
+                console.error(`Błąd zapisu zmiennej ${nazwa} do PLC:`, error);
+                $("#error-message").text(`Błąd zapisu zmiennej ${nazwa}: ${error}`);
+                $("#error-message").show();
+            });
+
+            function odczytajZmienne() {
+                const nazwyZmiennych = ["MyGVL.MyBoolVariable", "MyGVL.iCounter"]; // Dodajemy nazwy zmiennych
+                connection.invoke("OdczytajZmienne", "TwojaGrupa", nazwyZmiennych)
+                    .catch(err => console.error("Błąd wywołania OdczytajZmienne:", err));
             }
 
-            const intervalId = setInterval(aktualizujDane, 1000); // Aktualizacja co sekundę
+            function zapiszZmienne(zmienneDoZapisu) {
+                connection.invoke("ZapiszZmienne", "TwojaGrupa", zmienneDoZapisu)
+                    .catch(err => console.error("Błąd wywołania ZapiszZmienne:", err));
+            }
+
+            // Aktualizacja co 5 sekund (możesz zmienić)
+            setInterval(odczytajZmienne, 5000);
 
             window.addEventListener('beforeunload', function () {
-                clearInterval(intervalId); // Zatrzymaj interwał
-                connection.invoke("OdlaczOdGrupy", "TwojaGrupa") // Opcjonalne - serwer i tak obsłuży rozłączenie
-                    .catch(err => console.error("Błąd rozłączenia:", err));
                 connection.stop()
                     .catch(err => console.error("Błąd zatrzymania połączenia:", err));
             });
