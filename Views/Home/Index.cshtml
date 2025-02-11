@@ -1,0 +1,73 @@
+﻿@{
+    ViewData["Title"] = "Home";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<div class="card mt-5">
+    @Html.TextBox("ScreanInput", null, new { @class = "calculator-screan", disabled = "disabled" })
+    <div class="calculator-btns">
+        <button type="button" class="btn-success">7</button>
+        <button type="button" class="btn-success">8</button>
+        <button type="button" class="btn-success end-button">9</button>
+    </div>
+</div>
+
+<h1>Wartość MyBoolVariable z PLC: <span id="wartosc-zmiennej">@ViewData["MyBoolValue"]</span></h1>
+<h1>Wartość iCounter z PLC: <span id="wartosc-icounter">@ViewData["MyIntValue"]</span></h1>
+
+<div id="error-message" style="display:none; color:red;"></div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/3.1.18/signalr.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            let connection = new signalR.HubConnectionBuilder()
+                .withUrl("/plchub", { transport: signalR.HttpTransportType.WebSockets })
+                .build();
+
+            connection.start()
+                .then(() => {
+                    console.log("Połączono z Hubem.");
+                })
+                .catch(err => console.error("Błąd połączenia:", err));
+
+            connection.on("OtrzymajDane", function (boolValue, intValue) {
+                console.log("Odebrano dane:", boolValue, intValue);
+
+                $("#wartosc-zmiennej").text(boolValue);
+                console.log("Zaktualizowano #wartosc-zmiennej:", boolValue);
+
+                $("#wartosc-icounter").text(intValue);
+                console.log("Zaktualizowano #wartosc-icounter:", intValue);
+
+                $("#error-message").hide();
+            });
+
+            connection.on("BladOdczytu", function (error) {
+                console.error("Błąd odczytu z PLC:", error);
+                $('#wartosc-zmiennej').text("Błąd odczytu");
+                $('#wartosc-icounter').text("Błąd odczytu");
+                $('#error-message').text(error);
+                $('#error-message').show();
+            });
+
+            function aktualizujDane() {
+                connection.invoke("AktualizujDane", "TwojaGrupa")
+                    .catch(err => console.error("Błąd wywołania:", err));
+            }
+
+            const intervalId = setInterval(aktualizujDane, 1000); // Aktualizacja co sekundę
+
+            window.addEventListener('beforeunload', function () {
+                clearInterval(intervalId); // Zatrzymaj interwał
+                connection.invoke("OdlaczOdGrupy", "TwojaGrupa") // Opcjonalne - serwer i tak obsłuży rozłączenie
+                    .catch(err => console.error("Błąd rozłączenia:", err));
+                connection.stop()
+                    .catch(err => console.error("Błąd zatrzymania połączenia:", err));
+            });
+        });
+    </script>
+}
