@@ -1,15 +1,20 @@
 using PlcVariableReader;
+using Microsoft.Extensions.Logging; // Dodajemy using dla ILogger
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Konfiguracja logowania (bez zmian)
-builder.Logging.ClearProviders();
-builder.Logging.AddConsole();
-builder.Logging.AddDebug();
+// Konfiguracja logowania - **DODAJ TO!**
+builder.Logging.ClearProviders(); // Opcjonalnie czyœcimy domyœlne providery
+builder.Logging.AddConsole(); // Dodajemy logowanie do konsoli
+builder.Logging.AddDebug(); // Dodajemy logowanie do debuggera
+//builder.Logging.AddFile("logs/mylog-.txt", rollingInterval: RollingInterval.Day); // Dodajemy logowanie do pliku (opcjonalnie)
 
 // Dodajemy rejestracjê PlcReader - **TO JEST KLUCZOWE**
 builder.Services.Configure<PlcConfiguration>(builder.Configuration.GetSection("PlcConfiguration")); // Rejestrujemy konfiguracjê
 builder.Services.AddTransient<PlcReader>();  // Dodajemy PlcReader do kontenera DI
+
+// Dodajemy rejestracjê PlcService - **DODANO**
+builder.Services.AddTransient<PlcService>();
 
 // Dodajemy SignalR - **NAJPIERW REJESTRACJA US£UG!**
 builder.Services.AddSignalR();
@@ -35,8 +40,8 @@ app.UseRouting();
 app.UseAuthorization();
 
 app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+ name: "default",
+ pattern: "{controller=Home}/{action=Index}/{id?}");
 
 // Mapujemy Hub na URL - **DOPIERO PO REJESTRACJI US£UG!**
 app.MapHub<PlcHub>("/plchub"); // To musi byæ po app.UseRouting()

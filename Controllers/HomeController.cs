@@ -1,49 +1,46 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using PlcVariableReader;
 using System.Diagnostics;
+using System.Threading.Tasks; // Dodajemy using dla Task
 using WebApplication2.Models;
-using Microsoft.Extensions.Options;
-using Microsoft.Extensions.Logging; // Dodajemy using dla ILogger
 
 namespace WebApplication2.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger; // Dodajemy ILogger
-        private readonly PlcReader _plcReader; // Poprawne pole: readonly i inicjalizowane w konstruktorze
+        private readonly ILogger<HomeController> _logger;
+        private readonly PlcService _plcService; // Wstrzykujemy PlcService
 
-        public HomeController(ILogger<HomeController> logger, PlcReader plcReader) // Wstrzykujemy PlcReader
+        public HomeController(ILogger<HomeController> logger, PlcService plcService) // Dodajemy PlcService do konstruktora
         {
             _logger = logger;
-            _plcReader = plcReader; // Przypisujemy wstrzyknięty obiekt
+            _plcService = plcService; // Przypisujemy wstrzyknięty obiekt
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            if (_plcReader == null)  // Sprawdzamy, czy _plcReader jest zainicjalizowane
-            {
-                _logger.LogError("PlcReader jest null. Sprawdź rejestrację w DI."); // Logujemy błąd
-                ViewData["ErrorMessage"] = "Błąd: Nie można połączyć z PLC."; // Komunikat dla użytkownika
-                return View();
-            }
-
             try
             {
-                bool myBoolValue = _plcReader.ReadBoolVariable("MyGVL.MyBoolVariable");
-                int myIntValue = _plcReader.ReadIntVariable("MyGVL.iCounter");
+                var viewModel = new PlcVariablesViewModel(); // Utworzenie instancji modelu
 
-                ViewData["MyBoolValue"] = myBoolValue;
-                ViewData["MyIntValue"] = myIntValue;
+                // Odczyt wszystkich zmiennych
+                viewModel.MyBoolVariable = await _plcService.ReadVariableAsync<bool>("MyGVL.MyBoolVariable");
+                viewModel.iCounter = await _plcService.ReadVariableAsync<int>("MyGVL.iCounter");
+                viewModel.sTekst = await _plcService.ReadVariableAsync<string>("MyGVL.sTekst");
+                viewModel.iTemperature = await _plcService.ReadVariableAsync<int>("MyGVL.iTemperature");
+                viewModel.iPressure = await _plcService.ReadVariableAsync<int>("MyGVL.iPressure");
+                viewModel.MomentarySwitch = await _plcService.ReadVariableAsync<bool>("MyGVL.MomentarySwitch");
+                viewModel.ToggleSwitch = await _plcService.ReadVariableAsync<bool>("MyGVL.ToggleSwitch");
 
-                _logger.LogInformation("Odczytano wartości z PLC: MyBoolValue={myBoolValue}, MyIntValue={myIntValue}", myBoolValue, myIntValue);
-
-                return View();
+                return View(viewModel); // Przekazanie modelu do widoku
             }
             catch (PlcException ex)
             {
-                _logger.LogError(ex, "Błąd odczytu z PLC."); // Logujemy wyjątek
-                ViewData["ErrorMessage"] = ex.Message; // Przekazujemy komunikat o błędzie do widoku
-                return View();
+                _logger.LogError(ex, "Błąd odczytu z PLC.");
+                ViewData["ErrorMessage"] = ex.Message;
+                var emptyModel = new PlcVariablesViewModel(); // Utwórz pusty model
+                return View(emptyModel); // Przekaż pusty model do widoku
             }
         }
 

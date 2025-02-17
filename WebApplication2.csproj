@@ -10,6 +10,8 @@
     <PackageReference Include="Beckhoff.TwinCAT.Ads" Version="6.2.244" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="9.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client.Core" Version="9.0.1" />
+    <PackageReference Include="System.Net.Http.Json" Version="9.0.2" />
+    <PackageReference Include="System.Text.Json" Version="9.0.2" />
   </ItemGroup>
 
   <ItemGroup>

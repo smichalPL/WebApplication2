@@ -1,4 +1,6 @@
-﻿@{
+﻿@model WebApplication2.Models.PlcVariablesViewModel
+
+@{
     ViewData["Title"] = "Home";
 }
 
@@ -13,8 +15,47 @@
     </div>
 </div>
 
-<h1>Wartość MyBoolVariable z PLC: <span id="wartosc-zmiennej">@ViewData["MyBoolValue"]</span></h1>
-<h1>Wartość iCounter z PLC: <span id="wartosc-icounter">@ViewData["MyIntValue"]</span></h1>
+<h1>Wartości z PLC</h1>
+
+<p>MyBoolVariable: <span id="my-bool-variable-display">@Model.MyBoolVariable</span></p>
+<p>iCounter: <span id="i-counter-display">@Model.iCounter</span></p>
+<p>sTekst: <span id="s-tekst-display">@Model.sTekst</span></p>
+<p>iTemperature: <span id="i-temperature-display">@Model.iTemperature</span></p>
+<p>iPressure: <span id="i-pressure-display">@Model.iPressure</span></p>
+<p>MomentarySwitch: <span id="momentary-switch-display">@Model.MomentarySwitch</span></p>
+<p>ToggleSwitch: <span id="toggle-switch-display">@Model.ToggleSwitch</span></p>
+
+<h2>Zapis danych do PLC</h2>
+
+<input type="checkbox" id="my-bool-variable">
+<label for="my-bool-variable">MyBoolVariable</label>
+<br>
+
+<input type="number" id="i-counter" value="0">
+<label for="i-counter">iCounter</label>
+<br>
+
+<input type="text" id="s-tekst">
+<label for="s-tekst">sTekst</label>
+<br>
+
+<input type="number" id="i-temperature" value="0">
+<label for="i-temperature">iTemperature</label>
+<br>
+
+<input type="number" id="i-pressure" value="0">
+<label for="i-pressure">iPressure</label>
+<br>
+
+<input type="checkbox" id="momentary-switch">
+<label for="momentary-switch">MomentarySwitch</label>
+<br>
+
+<input type="checkbox" id="toggle-switch">
+<label for="toggle-switch">ToggleSwitch</label>
+<br>
+
+<button id="zapisz-przycisk">Zapisz wartość</button>
 
 <div id="error-message" style="display:none; color:red;"></div>
 
@@ -31,43 +72,106 @@
             connection.start()
                 .then(() => {
                     console.log("Połączono z Hubem.");
+                    aktualizujDane();
                 })
                 .catch(err => console.error("Błąd połączenia:", err));
 
-            connection.on("OtrzymajDane", function (boolValue, intValue) {
-                console.log("Odebrano dane:", boolValue, intValue);
+            cconnection.on("OtrzymajDane", function (viewModel) {
+                console.log("Odebrano dane:", viewModel); // Logujemy cały obiekt viewModel
+                console.log("iCounter:", viewModel.iCounter); // Logujemy tylko wartość iCounter
 
-                $("#wartosc-zmiennej").text(boolValue);
-                console.log("Zaktualizowano #wartosc-zmiennej:", boolValue);
+                $("#my-bool-variable-display").text(viewModel.MyBoolVariable);
+                //$("#i-counter-display").text(viewModel.iCounter);
+                $("#i-counter-display").html(viewModel.iCounter); // Aktualizujemy widok (spróbuj .html())
+                console.log("Zaktualizowano widok iCounter:", $("#i-counter-display").text()); // Logujemy wartość po aktualizacji widoku
+                $("#s-tekst-display").text(viewModel.sTekst);
+                $("#i-temperature-display").text(viewModel.iTemperature);
+                $("#i-pressure-display").text(viewModel.iPressure);
+                $("#momentary-switch-display").text(viewModel.MomentarySwitch);
+                $("#toggle-switch-display").text(viewModel.ToggleSwitch);
 
-                $("#wartosc-icounter").text(intValue);
-                console.log("Zaktualizowano #wartosc-icounter:", intValue);
+                $("#my-bool-variable").prop("checked", viewModel.MyBoolVariable);
+                $("#momentary-switch").prop("checked", viewModel.MomentarySwitch);
+                $("#toggle-switch").prop("checked", viewModel.ToggleSwitch);
 
                 $("#error-message").hide();
             });
 
             connection.on("BladOdczytu", function (error) {
                 console.error("Błąd odczytu z PLC:", error);
-                $('#wartosc-zmiennej').text("Błąd odczytu");
-                $('#wartosc-icounter').text("Błąd odczytu");
-                $('#error-message').text(error);
-                $('#error-message').show();
+                $("#error-message").text("Błąd odczytu z PLC: " + error);
+                $("#error-message").show();
             });
 
             function aktualizujDane() {
+                console.log("Wywołano aktualizujDane()");
                 connection.invoke("AktualizujDane", "TwojaGrupa")
-                    .catch(err => console.error("Błąd wywołania:", err));
+                    .then(() => console.log("Wywołano AktualizujDane w hubie.")) // Dodajemy logowanie po pomyślnym wywołaniu
+                    .catch(err => console.error("Błąd wywołania AktualizujDane:", err));
             }
 
-            const intervalId = setInterval(aktualizujDane, 1000); // Aktualizacja co sekundę
+            const intervalId = setInterval(aktualizujDane, 2000);
 
             window.addEventListener('beforeunload', function () {
-                clearInterval(intervalId); // Zatrzymaj interwał
-                connection.invoke("OdlaczOdGrupy", "TwojaGrupa") // Opcjonalne - serwer i tak obsłuży rozłączenie
+                clearInterval(intervalId);
+                connection.invoke("OdlaczOdGrupy", "TwojaGrupa")
                     .catch(err => console.error("Błąd rozłączenia:", err));
                 connection.stop()
                     .catch(err => console.error("Błąd zatrzymania połączenia:", err));
             });
+
+            $("#zapisz-przycisk").click(function () {
+                const viewModel = {
+                    MyBoolVariable: $("#my-bool-variable").is(":checked"),
+                    iCounter: parseInt($("#i-counter").val()),
+                    sTekst: $("#s-tekst").val(),
+                    iTemperature: parseInt($("#i-temperature").val()),
+                    iPressure: parseInt($("#i-pressure").val()),
+                    MomentarySwitch: $("#momentary-switch").is(":checked"),
+                    ToggleSwitch: $("#toggle-switch").is(":checked")
+                };
+
+                if (isNaN(viewModel.iCounter) || isNaN(viewModel.iTemperature) || isNaN(viewModel.iPressure)) {
+                    console.error("Niepoprawne wartości liczbowe.");
+                    $("#error-message").text("Niepoprawne wartości liczbowe.");
+                    $("#error-message").show();
+                    return;
+                }
+
+                // Iterujemy po właściwościach viewModel i zapisujemy każdą zmienną oddzielnie
+                for (const variableName in viewModel) {
+                    connection.invoke("ZapiszDane", "TwojaGrupa", "MyGVL." + variableName, JSON.stringify(viewModel))
+                        .then(() => console.log(`Zapisano ${variableName}`))
+                        .catch(err => {
+                            console.error(`Błąd zapisu ${variableName}:`, err);
+                            $("#error-message").text(`Błąd zapisu ${variableName}: ` + err);
+                            $("#error-message").show();
+                        });
+                }
+            });
+
+            connection.on("DaneZapisane", function (variableName, viewModel) {
+                console.log(`Zapisano wartość do zmiennej '${variableName}'.`, viewModel);
+                // Aktualizujemy tylko te pola, które zostały zmienione
+                $("#my-bool-variable-display").text(viewModel.MyBoolVariable);
+                $("#i-counter-display").text(viewModel.iCounter);
+                $("#s-tekst-display").text(viewModel.sTekst);
+                $("#i-temperature-display").text(viewModel.iTemperature);
+                $("#i-pressure-display").text(viewModel.iPressure);
+                $("#momentary-switch-display").text(viewModel.MomentarySwitch);
+                $("#toggle-switch-display").text(viewModel.ToggleSwitch);
+
+                $("#my-bool-variable").prop("checked", viewModel.MyBoolVariable);
+                $("#momentary-switch").prop("checked", viewModel.MomentarySwitch);
+                $("#toggle-switch").prop("checked", viewModel.ToggleSwitch);
+            });
+
+            connection.on("BladZapisu", function (variableName, error) {
+                console.error(`Błąd zapisu do zmiennej '${variableName}': ${error}`);
+                $("#error-message").text(`Błąd zapisu do zmiennej '${variableName}': ` + error);
+                $("#error-message").show();
+            });
+
         });
     </script>
 }

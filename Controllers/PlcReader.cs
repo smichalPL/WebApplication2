@@ -1,6 +1,9 @@
-﻿using Microsoft.Extensions.Options; // Dodaj ten using
-using TwinCAT.Ads; // Dodaj ten using (lub odpowiedni dla twojej biblioteki ADS)
+﻿using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Logging;
+using TwinCAT.Ads;
 using System;
+using System.Collections.Generic;
+using System.Text;
 
 namespace PlcVariableReader
 {
@@ -10,14 +13,28 @@ namespace PlcVariableReader
         private bool _disposed = false;
         private readonly string _amsNetId;
         private readonly int _port;
+        private readonly ILogger<PlcReader> _logger;
 
-        public PlcReader(IOptions<PlcConfiguration> plcConfiguration) // Wstrzykiwanie IOptions
+        private static Dictionary<string, Type> _plcVariables = new Dictionary<string, Type>()
+        {
+            { "MyGVL.MyBoolVariable", typeof(bool) },
+            { "MyGVL.iCounter", typeof(Int32) },
+            { "MyGVL.sTekst", typeof(string) },
+            { "MyGVL.iTemperature", typeof(Int32) },
+            { "MyGVL.iPressure", typeof(Int32) },
+            { "MyGVL.MomentarySwitch", typeof(bool) },
+            { "MyGVL.ToggleSwitch", typeof(bool) }
+        };
+
+        public PlcReader(IOptions<PlcConfiguration> plcConfiguration, ILogger<PlcReader> logger)
         {
             _amsNetId = plcConfiguration.Value.IpAddress;
             _port = plcConfiguration.Value.Port;
+            _logger = logger;
 
-            if (_amsNetId == null || _port == 0) // Sprawdzamy, czy konfiguracja jest poprawna
+            if (string.IsNullOrEmpty(_amsNetId) || _port == 0)
             {
+                _logger.LogError("Adres IP i/lub port PLC nie zostały skonfigurowane.");
                 throw new ArgumentNullException("Adres IP i/lub port PLC nie zostały skonfigurowane.");
             }
 
@@ -25,48 +42,92 @@ namespace PlcVariableReader
 
             try
             {
+                _logger.LogInformation($"Próba połączenia z PLC: {_amsNetId}:{_port}");
                 _adsClient.Connect(_amsNetId, _port);
+                _logger.LogInformation($"Połączono z PLC: {_amsNetId}:{_port}");
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, $"Błąd połączenia z PLC: {ex.Message}");
                 throw new PlcException($"Błąd połączenia z PLC: {ex.Message}", ex);
             }
         }
 
+        public T ReadVariable<T>(string variableName)
+        {
+            _logger.LogInformation($"PlcReader: Próba odczytu zmiennej: {variableName}");
 
-        public bool ReadBoolVariable(string variableName)
-        {
-            try
+            if (!_plcVariables.ContainsKey(variableName))
             {
-                var handle = _adsClient.CreateVariableHandle(variableName);
-                bool value = (bool)_adsClient.ReadAny(handle, typeof(bool));
-                _adsClient.DeleteVariableHandle(handle);
-                return value;
+                _logger.LogError($"Zmienna '{variableName}' nie istnieje w słowniku.");
+                throw new ArgumentException($"Zmienna '{variableName}' nie istnieje w słowniku.");
             }
-            catch (Exception ex)
+
+            Type expectedType = _plcVariables[variableName];
+            if (typeof(T) != expectedType)
             {
-                throw new PlcException($"Błąd odczytu zmiennej '{variableName}': {ex.Message}", ex);
+                _logger.LogError($"Niezgodność typów dla zmiennej '{variableName}'. Oczekiwano '{expectedType.Name}', a podano '{typeof(T).Name}'.");
+                throw new ArgumentException($"Niezgodność typów dla zmiennej '{variableName}'. Oczekiwano '{expectedType.Name}', a podano '{typeof(T).Name}'.");
             }
-        }
-        public int ReadIntVariable(string variableName)
-        {
-            Console.WriteLine($"Próba odczytu zmiennej: {variableName}"); // Log
 
             try
             {
                 var handle = _adsClient.CreateVariableHandle(variableName);
-                Console.WriteLine($"Utworzono handle dla zmiennej: {variableName}"); // Log
-                int value = (int)_adsClient.ReadAny(handle, typeof(int));
-                _adsClient.DeleteVariableHandle(handle);
-                Console.WriteLine($"Odczytano wartość zmiennej '{variableName}': {value}"); // Log
-                return value;
+
+                if (typeof(T) == typeof(string))
+                {
+                    byte[] bytes = _adsClient.ReadAny<byte[]>(handle, 51); // Odczytujemy 51 bajtów (STRING(51)) - **WAŻNE: 51 bajtów!**
+                    string strValue = Encoding.ASCII.GetString(bytes).TrimEnd('\0'); // Konwersja z ASCII - **WAŻNE: ASCII**
+                    _adsClient.DeleteVariableHandle(handle);
+                    _logger.LogInformation($"PlcReader: Odczytano wartość '{strValue}' z {variableName}");
+                    return (T)(object)strValue;
+                }
+                else
+                {
+                    T value = (T)_adsClient.ReadAny(handle, typeof(T));
+                    _adsClient.DeleteVariableHandle(handle);
+                    _logger.LogInformation($"PlcReader: Odczytano wartość {value} z {variableName}");
+                    return value;
+                }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Błąd odczytu zmiennej '{variableName}': {ex.Message}"); // Log
+                _logger.LogError(ex, $"PlcReader: Błąd odczytu zmiennej '{variableName}': {ex.Message}");
                 throw new PlcException($"Błąd odczytu zmiennej '{variableName}': {ex.Message}", ex);
             }
         }
+
+        public void WriteVariable<T>(string variableName, T value)
+        {
+            _logger.LogInformation($"PlcReader: Próba zapisu wartości {value} do zmiennej: {variableName}");
+
+            if (!_plcVariables.ContainsKey(variableName))
+            {
+                _logger.LogError($"Zmienna '{variableName}' nie istnieje w słowniku.");
+                throw new ArgumentException($"Zmienna '{variableName}' nie istnieje w słowniku.");
+            }
+
+            Type expectedType = _plcVariables[variableName];
+            if (typeof(T) != expectedType)
+            {
+                _logger.LogError($"Niezgodność typów dla zmiennej '{variableName}'. Oczekiwano '{expectedType.Name}', a podano '{typeof(T).Name}'.");
+                throw new ArgumentException($"Niezgodność typów dla zmiennej '{variableName}'. Oczekiwano '{expectedType.Name}', a podano '{typeof(T).Name}'.");
+            }
+
+            try
+            {
+                var handle = _adsClient.CreateVariableHandle(variableName);
+                _adsClient.WriteAny(handle, value);
+                _adsClient.DeleteVariableHandle(handle);
+                _logger.LogInformation($"PlcReader: Zapisano wartość {value} do zmiennej {variableName}");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"PlcReader: Błąd zapisu do zmiennej '{variableName}': {ex.Message}");
+                throw new PlcException($"Błąd zapisu do zmiennej '{variableName}': {ex.Message}", ex);
+            }
+        }
+
         public void Dispose()
         {
             Dispose(true);
@@ -90,10 +151,5 @@ namespace PlcVariableReader
         {
             Dispose(false);
         }
-    }
-
-    public class PlcException : Exception
-    {
-        public PlcException(string message, Exception innerException) : base(message, innerException) { }
     }
 }
