@@ -114,20 +114,23 @@ namespace PlcVariableReader
                 throw new ArgumentException($"Niezgodność typów dla zmiennej '{variableName}'. Oczekiwano '{expectedType.Name}', a podano '{typeof(T).Name}'.");
             }
 
+        public void WriteVariable(string variableName, object value)
+        {
             try
             {
                 var handle = _adsClient.CreateVariableHandle(variableName);
                 _adsClient.WriteAny(handle, value);
                 _adsClient.DeleteVariableHandle(handle);
                 _logger.LogInformation($"PlcReader: Zapisano wartość {value} do zmiennej {variableName}");
+                return value;
             }
             catch (Exception ex)
-            {
                 _logger.LogError(ex, $"PlcReader: Błąd zapisu do zmiennej '{variableName}': {ex.Message}");
                 throw new PlcException($"Błąd zapisu do zmiennej '{variableName}': {ex.Message}", ex);
+                throw new PlcException($"Błąd odczytu zmiennej '{variableName}': {ex.Message}", ex);
             }
-        }
 
+        }
         public void Dispose()
         {
             Dispose(true);

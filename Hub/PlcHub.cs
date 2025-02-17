@@ -10,6 +10,7 @@ public class PlcHub : Hub
 {
     private readonly PlcService _plcService;
     private readonly ILogger<PlcHub> _logger;
+    private readonly Dictionary<string, Zmienna> _zmienne = new Dictionary<string, Zmienna>(); // Słownik zmiennych
 
     public PlcHub(PlcService plcService, ILogger<PlcHub> logger)
     {
@@ -32,7 +33,7 @@ public class PlcHub : Hub
         await base.OnConnectedAsync();
     }
 
-    public async Task AktualizujDane(string grupa)
+    public async Task OdczytajZmienne(string grupa, List<string> nazwyZmiennych)
     {
         _logger.LogInformation("Wywołano metodę AktualizujDane.");
         try
