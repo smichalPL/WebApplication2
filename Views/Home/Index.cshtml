@@ -4,6 +4,34 @@
     ViewData["Title"] = "Home";
 }
 
+<div id="numeric-keyboard" style="display: none;">
+    <table>
+        <tr>
+            <td><button type="button">1</button></td>
+            <td><button type="button">2</button></td>
+            <td><button type="button">3</button></td>
+        </tr>
+        <tr>
+            <td><button type="button">4</button></td>
+            <td><button type="button">5</button></td>
+            <td><button type="button">6</button></td>
+        </tr>
+        <tr>
+            <td><button type="button">7</button></td>
+            <td><button type="button">8</button></td>
+            <td><button type="button">9</button></td>
+        </tr>
+        <tr>
+            <td><button type="button" id="zatwierdz">Za</button></td>
+            <td><button type="button">0</button></td>
+            <td><button type="button" id="cofnij">Co</button></td>
+        </tr>
+    </table>
+</div>
+
+<input type="hidden" id="pressure-input" value="">
+<input type="hidden" id="pressure-input" value="">
+
 <h1>@ViewData["Title"]</h1>
 
 <h2>Wartości z PLC</h2>
@@ -13,37 +41,12 @@
 <p>sTekst: <span id="s-tekst-display">@Model.sTekst</span></p>
 <p>iTemperature: <span id="i-temperature-display">@Model.iTemperature</span></p>
 <p>iPressure: <span id="i-pressure-display">@Model.iPressure</span></p>
-<p>MomentarySwitch: <span id="momentary-switch-display">@Model.MomentarySwitch</span></p>
-<p>ToggleSwitch: <span id="toggle-switch-display">@Model.ToggleSwitch</span></p>
 
 <h2>Zapis danych do PLC</h2>
 
-<input type="checkbox" id="my-bool-variable">
-<label for="my-bool-variable">MyBoolVariable</label>
-<br>
-
-<input type="number" id="i-counter" value="0">
-<label for="i-counter">iCounter</label>
-<br>
-
-<input type="text" id="s-tekst">
-<label for="s-tekst">sTekst</label>
-<br>
-
-<input type="number" id="i-temperature" value="0">
-<label for="i-temperature">iTemperature</label>
-<br>
-
-<input type="number" id="i-pressure" value="0">
-<label for="i-pressure">iPressure</label>
-<br>
 
 <input type="checkbox" id="momentary-switch">
 <label for="momentary-switch">MomentarySwitch</label>
-<br>
-
-<input type="checkbox" id="toggle-switch">
-<label for="toggle-switch">ToggleSwitch</label>
 <br>
 
 <button id="toggle-bool-button" class="toggle-button-@Model.MyBoolVariable">Zmień MyBoolVariable</button>
@@ -92,6 +95,69 @@
             }
         });
 
+        document.getElementById('i-pressure-display').addEventListener('click', () => {
+            document.getElementById('numeric-keyboard').style.display = 'block';
+        });
+
+        const keyboardButtons = document.querySelectorAll('#numeric-keyboard button');
+        let inputValue = '';
+
+        keyboardButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const buttonValue = button.textContent;
+
+                if (buttonValue === 'Za') {
+                    const newValueInt = parseInt(inputValue);
+                    if (!isNaN(newValueInt)) {
+                        saveNewPressureValue(newValueInt);
+                    } else {
+                        alert("Nieprawidłowa wartość. Wprowadź liczbę całkowitą.");
+                    }
+                    inputValue = '';
+                    document.getElementById('numeric-keyboard').style.display = 'none';
+                } else if (buttonValue === 'Co') {
+                    inputValue = ''; // Czyszczenie inputa
+                    document.getElementById('numeric-keyboard').style.display = 'none';
+                } else if (buttonValue === "Usuń") {
+                    inputValue = inputValue.slice(0, -1); // Usuwamy ostatni znak
+                } else if (buttonValue === ".") {
+                    if (!inputValue.includes(".")) { // Dodajemy warunek, aby można było dodać tylko jeden przecinek
+                        inputValue += buttonValue;
+                    }
+                }
+                else {
+                    inputValue += buttonValue;
+                }
+            });
+        });
+
+        async function saveNewPressureValue(newValue) {
+            try {
+                const response = await fetch('/updatePressure', { // Nowy endpoint w kontrolerze
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ iPressure: newValue }) // Wysyłamy nową wartość w JSON-ie
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json(); // Odbieramy zaktualizowane dane (opcjonalne)
+                console.log('Dane po zmianie iPressure:', data);
+
+                // Aktualizujemy wyświetlacz iPressure
+                document.getElementById('i-pressure-display').textContent = data.iPressure;
+
+            } catch (error) {
+                console.error('Błąd podczas zmiany iPressure:', error);
+            }
+        }
+
+        
+
         // Funkcja do aktualizacji koloru przycisku
         function updateButtonColor(myBoolVariable) {
             const button = document.getElementById('toggle-bool-button');
@@ -110,5 +176,54 @@
     .toggle-button-false {
         background-color: lightgray;
         color: black;
+    }
+
+    #i-pressure-display {
+        cursor: pointer;
+        text-decoration: underline;
+    }
+
+    #numeric-keyboard {
+        position: absolute;
+        background-color: #eee;
+        border: 2px solid #ccc;
+        padding: 15px;
+        z-index: 1000;
+        box-shadow: 5px 5px 10px rgba(0,0,0,0.3);
+        border-radius: 10px;
+    }
+
+        #numeric-keyboard table {
+            border-collapse: collapse;
+            width: auto;
+        }
+
+            #numeric-keyboard table tr td button {
+             color: black !important; /* Dodajemy !important, aby upewnić się, że ten styl będzie miał najwyższy priorytet */
+             font-size: 1rem; /* Zmniejszamy rozmiar czcionki */
+            width: 50px;
+            height: 50px;
+            margin: 8px;
+            border: none;
+            background-color: #fff;
+            cursor: pointer;
+            font-size: 20px;
+            border-radius: 5px;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+            /* Dodajemy kontrastowy kolor czcionki - ciemny szary lub czarny */
+            color: darkgrey; /* Można też użyć #000 dla czarnego */
+        }
+
+    #zatwierdz, #cofnij {
+        width: 108px;
+        background-color: #4CAF50;
+        /* Zmieniamy kolor czcionki na biały, bo przycisk jest zielony */
+        color: white;
+    }
+
+    #cofnij {
+        background-color: #f44336;
+        /* Zmieniamy kolor czcionki na biały, bo przycisk jest czerwony */
+        color: white;
     }
 </style>

@@ -99,6 +99,33 @@ namespace WebApplication2.Controllers
             }
         }
 
+        [HttpPost("/updatePressure")]
+        public async Task<IActionResult> UpdatePressure([FromBody] PressureData data) // Odbieramy dane z JSON-a
+        {
+            try
+            {
+                await _plcService.WriteVariableAsync("MyGVL.iPressure", data.iPressure); // Zapisujemy do PLC
+
+                // Opcjonalnie: odczytujemy i zwracamy zaktualizowane dane (JSON)
+                var model = new PlcVariablesViewModel();
+                model.iPressure = await _plcService.ReadVariableAsync<int>("MyGVL.iPressure");
+                // ... odczyt innych zmiennych ...
+
+                return Json(model); // Zwracamy zaktualizowane dane
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Błąd podczas zmiany iPressure w kontrolerze.");
+                return StatusCode(500);
+            }
+        }
+
+        // Klasa pomocnicza do deserializacji JSON-a
+        public class PressureData
+        {
+            public int iPressure { get; set; }
+        }
+
         public IActionResult Privacy()
 
         {
