@@ -39,13 +39,13 @@ public class PlcHub : Hub
         try
         {
          //   bool boolValue = await _plcService.ReadVariableAsync<bool>("MyGVL.MyBoolVariable");
-          //  int intValue = await _plcService.ReadVariableAsync<int>("MyGVL.iCounter");
+            int intValue = await _plcService.ReadVariableAsync<int>("MyGVL.iCounter");
           //  bool momentarySwitch = await _plcService.ReadVariableAsync<bool>("MyGVL.MomentarySwitch");
           //  bool toggleSwitch = await _plcService.ReadVariableAsync<bool>("MyGVL.ToggleSwitch");
 
-         //   _logger.LogInformation($"Odczytane wartości: iCounter = {intValue}");
+            _logger.LogInformation($"Odczytane wartości: iCounter = {intValue}");
 
-          //  await Clients.Group(grupa).SendAsync("OtrzymajDane", intValue);
+            await Clients.Group(grupa).SendAsync("OtrzymajDane", intValue);
         }
         catch (Exception ex)
         {
