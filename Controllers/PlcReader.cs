@@ -15,6 +15,8 @@ namespace PlcVariableReader
         private readonly int _port;
         private readonly ILogger<PlcReader> _logger;
 
+        // Klucze w słowniku MUSZĄ być dokładnie takie same, jak nazwy zmiennych w PLC!
+        // Prefiks "MyGVL." ZOSTAŁ dodany z powrotem.
         private static Dictionary<string, Type> _plcVariables = new Dictionary<string, Type>()
         {
             { "MyGVL.MyBoolVariable", typeof(bool) },
@@ -76,8 +78,8 @@ namespace PlcVariableReader
 
                 if (typeof(T) == typeof(string))
                 {
-                    byte[] bytes = _adsClient.ReadAny<byte[]>(handle, 51); // Odczytujemy 51 bajtów (STRING(51)) - **WAŻNE: 51 bajtów!**
-                    string strValue = Encoding.ASCII.GetString(bytes).TrimEnd('\0'); // Konwersja z ASCII - **WAŻNE: ASCII**
+                    byte[] bytes = _adsClient.ReadAny<byte[]>(handle, 51); // Odczytujemy 51 bajtów (STRING(51))
+                    string strValue = Encoding.ASCII.GetString(bytes).TrimEnd('\0'); // Konwersja z ASCII
                     _adsClient.DeleteVariableHandle(handle);
                     _logger.LogInformation($"PlcReader: Odczytano wartość '{strValue}' z {variableName}");
                     return (T)(object)strValue;
@@ -112,6 +114,30 @@ namespace PlcVariableReader
             {
                 _logger.LogError($"Niezgodność typów dla zmiennej '{variableName}'. Oczekiwano '{expectedType.Name}', a podano '{typeof(T).Name}'.");
                 throw new ArgumentException($"Niezgodność typów dla zmiennej '{variableName}'. Oczekiwano '{expectedType.Name}', a podano '{typeof(T).Name}'.");
+            }
+
+            try
+            {
+                var handle = _adsClient.CreateVariableHandle(variableName);
+
+                if (typeof(T) == typeof(string))
+                {
+                    byte[] bytes = Encoding.ASCII.GetBytes(value.ToString()); // Konwersja na ASCII
+                    Array.Resize(ref bytes, 51); // Ustalenie rozmiaru na 51 bajtów
+                    _adsClient.WriteAny(handle, bytes);
+                }
+                else
+                {
+                    _adsClient.WriteAny(handle, value);
+                }
+
+                _adsClient.DeleteVariableHandle(handle);
+                _logger.LogInformation($"PlcReader: Zapisano wartość {value} do zmiennej: {variableName}");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"PlcReader: Błąd zapisu do zmiennej '{variableName}': {ex.Message}");
+                throw new PlcException($"Błąd zapisu do zmiennej '{variableName}': {ex.Message}", ex);
             }
         }
 

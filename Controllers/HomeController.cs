@@ -18,31 +18,31 @@ namespace WebApplication2.Controllers
             _plcService = plcService; // Przypisujemy wstrzyknięty obiekt
         }
 
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
+            var model = new PlcVariablesViewModel(); // Utwórz *nową* instancję modelu!
+
+            // **Kluczowe:** Odczytaj wartości z PLC i zaktualizuj model *PRZED* przekazaniem go do widoku.
+            // UWAGA: Użycie .Result blokuje wątek i jest akceptowalne TYLKO w akcji kontrolera.
             try
             {
-                var viewModel = new PlcVariablesViewModel(); // Utworzenie instancji modelu
-
-                // Odczyt wszystkich zmiennych
-                viewModel.MyBoolVariable = await _plcService.ReadVariableAsync<bool>("MyGVL.MyBoolVariable");
-                viewModel.iCounter = await _plcService.ReadVariableAsync<int>("MyGVL.iCounter");
-                viewModel.sTekst = await _plcService.ReadVariableAsync<string>("MyGVL.sTekst");
-                viewModel.iTemperature = await _plcService.ReadVariableAsync<int>("MyGVL.iTemperature");
-                viewModel.iPressure = await _plcService.ReadVariableAsync<int>("MyGVL.iPressure");
-                viewModel.MomentarySwitch = await _plcService.ReadVariableAsync<bool>("MyGVL.MomentarySwitch");
-                viewModel.ToggleSwitch = await _plcService.ReadVariableAsync<bool>("MyGVL.ToggleSwitch");
-
-                return View(viewModel); // Przekazanie modelu do widoku
+                model.MyBoolVariable = _plcService.ReadVariableAsync<bool>("MyGVL.MyBoolVariable").Result;
+                model.iCounter = _plcService.ReadVariableAsync<int>("MyGVL.iCounter").Result;
+                model.sTekst = _plcService.ReadVariableAsync<string>("MyGVL.sTekst").Result;
+                model.iTemperature = _plcService.ReadVariableAsync<int>("MyGVL.iTemperature").Result;
+                model.iPressure = _plcService.ReadVariableAsync<int>("MyGVL.iPressure").Result;
+                model.MomentarySwitch = _plcService.ReadVariableAsync<bool>("MyGVL.MomentarySwitch").Result;
+                model.ToggleSwitch = _plcService.ReadVariableAsync<bool>("MyGVL.ToggleSwitch").Result;
             }
-            catch (PlcException ex)
+            catch (Exception ex)
             {
-                _logger.LogError(ex, "Błąd odczytu z PLC.");
-                ViewData["ErrorMessage"] = ex.Message;
-                // var emptyModel = new PlcVariablesViewModel(); // Utwórz pusty model
-                // return View(emptyModel); // Przekaż pusty model do widoku
-                return View(); // Przekazanie modelu do widoku
+                _logger.LogError(ex, "Błąd odczytu z PLC w kontrolerze.");
+                // Możesz opcjonalnie ustawić domyślne wartości w modelu w przypadku błędu.
+                model.iCounter = -1; // przykład
+                model.sTekst = "Błąd odczytu"; // przykład
             }
+
+            return View(model); // Przekaż model do widoku!
         }
 
         public IActionResult Privacy()
