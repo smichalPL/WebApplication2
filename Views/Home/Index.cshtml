@@ -6,16 +6,8 @@
 
 <h1>@ViewData["Title"]</h1>
 
-<div class="card mt-5">
-    @Html.TextBox("ScreanInput", null, new { @class = "calculator-screan", disabled = "disabled" })
-    <div class="calculator-btns">
-        <button type="button" class="btn-success">7</button>
-        <button type="button" class="btn-success">8</button>
-        <button type="button" class="btn-success end-button">9</button>
-    </div>
-</div>
 
-<h1>Wartości z PLC</h1>
+<h2>Wartości z PLC</h2>
 
 <p>MyBoolVariable: <span id="my-bool-variable-display">@Model.MyBoolVariable</span></p>
 <p>iCounter: <span id="i-counter-display">@Model.iCounter</span></p>
@@ -55,123 +47,49 @@
 <label for="toggle-switch">ToggleSwitch</label>
 <br>
 
-<button id="zapisz-przycisk">Zapisz wartość</button>
+<button id="toggle-bool-button">Zmień MyBoolVariable</button>
+
+
 
 <div id="error-message" style="display:none; color:red;"></div>
 
 @section Scripts {
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/3.1.18/signalr.min.js"></script>
 
     <script>
-        $(document).ready(function () {
-            // Definicja funkcji aktualizujDane *PRZED* jej wywołaniem
-            function aktualizujDane() {
-                console.log("Wywołano aktualizujDane()");
-                connection.invoke("OdczytajZmienne", "TwojaGrupa", ["MyGVL.MyBoolVariable", "MyGVL.iCounter", "MyGVL.sTekst", "MyGVL.iTemperature", "MyGVL.iPressure", "MyGVL.MomentarySwitch", "MyGVL.ToggleSwitch"])
-                    .then(() => console.log("Wywołano OdczytajZmienne w hubie."))
-                    .catch(err => console.error("Błąd wywołania OdczytajZmienne:", err));
+        async function refresh() {
+            const request = await fetch('/json');
+            const data = await request.json();
+
+            console.log('Nasze dane', data);
+            document.getElementById('i-counter-display').textContent = data.iCounter;
+            document.getElementById('my-bool-variable-display').textContent = data.MyBoolVariable;
+        }
+
+        setInterval(refresh, 2000);
+
+        document.getElementById('toggle-bool-button').addEventListener('click', async () => {
+            try {
+                const response = await fetch('/toggleBool', { // Nowy endpoint /toggleBool
+                    method: 'POST', // Ważne: używamy POST
+                    headers: {
+                        'Content-Type': 'application/json' // Informujemy serwer, że wysyłamy JSON
+                    },
+                    body: JSON.stringify({}) // Wysyłamy puste ciało - serwer sam odczyta i zmieni wartość
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json(); // Odbieramy zaktualizowane dane (opcjonalne)
+                console.log('Dane po zmianie MyBoolVariable:', data);
+
+                // Aktualizujemy wyświetlacz MyBoolVariable (opcjonalne)
+                document.getElementById('my-bool-variable-display').textContent = data.MyBoolVariable;
+
+            } catch (error) {
+                console.error('Błąd podczas zmiany MyBoolVariable:', error);
             }
-
-            let connection = new signalR.HubConnectionBuilder()
-                .withUrl("/plchub", { transport: signalR.HttpTransportType.WebSockets })
-                .build();
-
-            connection.start()
-                .then(() => {
-                    console.log("Połączono z Hubem.");
-                    aktualizujDane(); // Wywołanie funkcji *PO* jej definicji
-                })
-                .catch(err => console.error("Błąd połączenia:", err));
-
-            connection.on("OtrzymajDane", function (data) {
-                console.log("Odebrano dane:", data);
-
-                for (const variableName in data) {
-                    const value = data[variableName];
-                    console.log(`${variableName}: ${value}`);
-
-                    const displayElement = $(`#${variableName.toLowerCase().replace('.', '-')}-display`);
-                    if (displayElement.length) {
-                        displayElement.text(value);
-                    } else {
-                        console.warn(`Element wyświetlający dla ${variableName} nie istnieje.`);
-                    }
-
-                    const checkboxElement = $(`#${variableName.toLowerCase().replace('.', '-')}`);
-                    if (checkboxElement.length && typeof value === 'boolean') {
-                        checkboxElement.prop("checked", value);
-                    }
-                }
-                $("#error-message").hide();
-            });
-
-            connection.on("BladOdczytu", function (error) {
-                console.error("Błąd odczytu z PLC:", error);
-                $("#error-message").text("Błąd odczytu z PLC: " + error);
-                $("#error-message").show();
-            });
-
-
-            const intervalId = setInterval(aktualizujDane, 2000);
-
-            window.addEventListener('beforeunload', function () {
-                clearInterval(intervalId);
-                connection.invoke("OdlaczOdGrupy", "TwojaGrupa")
-                    .catch(err => console.error("Błąd rozłączenia:", err));
-                connection.stop()
-                    .catch(err => console.error("Błąd zatrzymania połączenia:", err));
-            });
-
-            $("#zapisz-przycisk").click(function () {
-                const viewModel = {
-                    MyBoolVariable: $("#my-bool-variable").is(":checked"),
-                    iCounter: parseInt($("#i-counter").val()),
-                    sTekst: $("#s-tekst").val(),
-                    iTemperature: parseInt($("#i-temperature").val()),
-                    iPressure: parseInt($("#i-pressure").val()),
-                    MomentarySwitch: $("#momentary-switch").is(":checked"),
-                    ToggleSwitch: $("#toggle-switch").is(":checked")
-                };
-
-                if (isNaN(viewModel.iCounter) || isNaN(viewModel.iTemperature) || isNaN(viewModel.iPressure)) {
-                    console.error("Niepoprawne wartości liczbowe.");
-                    $("#error-message").text("Niepoprawne wartości liczbowe.");
-                    $("#error-message").show();
-                    return;
-                }
-
-                for (const variableName in viewModel) {
-                    connection.invoke("ZapiszDane", "TwojaGrupa", "MyGVL." + variableName, JSON.stringify(viewModel))
-                        .then(() => console.log(`Zapisano ${variableName}`))
-                        .catch(err => {
-                            console.error(`Błąd zapisu ${variableName}:`, err);
-                            $("#error-message").text(`Błąd zapisu ${variableName}: ` + err);
-                            $("#error-message").show();
-                        });
-                }
-            });
-
-            connection.on("DaneZapisane", function (variableName, viewModel) {
-                console.log(`Zapisano wartość do zmiennej '${variableName}'.`, viewModel);
-                $("#my-bool-variable-display").text(viewModel.MyBoolVariable);
-                $("#i-counter-display").text(viewModel.iCounter);
-                $("#s-tekst-display").text(viewModel.sTekst);
-                $("#i-temperature-display").text(viewModel.iTemperature);
-                $("#i-pressure-display").text(viewModel.iPressure);
-                $("#momentary-switch-display").text(viewModel.MomentarySwitch);
-                $("#toggle-switch-display").text(viewModel.ToggleSwitch);
-
-                $("#my-bool-variable").prop("checked", viewModel.MyBoolVariable);
-                $("#momentary-switch").prop("checked", viewModel.MomentarySwitch);
-                $("#toggle-switch").prop("checked", viewModel.ToggleSwitch);
-            });
-
-            connection.on("BladZapisu", function (variableName, error) {
-                console.error(`Błąd zapisu do zmiennej '${variableName}': ${error}`);
-                $("#error-message").text(`Błąd zapisu do zmiennej '${variableName}': ` + error);
-                $("#error-message").show();
-            });
         });
     </script>
 }

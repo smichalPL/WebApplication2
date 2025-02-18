@@ -21,8 +21,12 @@ builder.Services.AddTransient<PlcService>();
 // Rejestracja SignalR
 builder.Services.AddSignalR();
 
-// Dodajemy us³ugi MVC
-builder.Services.AddControllersWithViews();
+// Dodajemy us³ugi MVC *i konfigurujemy JSON options*
+builder.Services.AddControllersWithViews()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.PropertyNamingPolicy = null; // <-- Dodajemy tê liniê
+    });
 
 var app = builder.Build();
 
