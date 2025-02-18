@@ -6,7 +6,6 @@
 
 <h1>@ViewData["Title"]</h1>
 
-
 <h2>Wartości z PLC</h2>
 
 <p>MyBoolVariable: <span id="my-bool-variable-display">@Model.MyBoolVariable</span></p>
@@ -47,14 +46,11 @@
 <label for="toggle-switch">ToggleSwitch</label>
 <br>
 
-<button id="toggle-bool-button">Zmień MyBoolVariable</button>
-
-
+<button id="toggle-bool-button" class="toggle-button-@Model.MyBoolVariable">Zmień MyBoolVariable</button>
 
 <div id="error-message" style="display:none; color:red;"></div>
 
 @section Scripts {
-
     <script>
         async function refresh() {
             const request = await fetch('/json');
@@ -63,33 +59,56 @@
             console.log('Nasze dane', data);
             document.getElementById('i-counter-display').textContent = data.iCounter;
             document.getElementById('my-bool-variable-display').textContent = data.MyBoolVariable;
+
+            // Aktualizacja koloru przycisku MyBoolVariable
+            updateButtonColor(data.MyBoolVariable);
         }
 
         setInterval(refresh, 2000);
 
         document.getElementById('toggle-bool-button').addEventListener('click', async () => {
             try {
-                const response = await fetch('/toggleBool', { // Nowy endpoint /toggleBool
-                    method: 'POST', // Ważne: używamy POST
+                const response = await fetch('/toggleBool', {
+                    method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json' // Informujemy serwer, że wysyłamy JSON
+                        'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({}) // Wysyłamy puste ciało - serwer sam odczyta i zmieni wartość
+                    body: JSON.stringify({})
                 });
 
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
 
-                const data = await response.json(); // Odbieramy zaktualizowane dane (opcjonalne)
+                const data = await response.json();
                 console.log('Dane po zmianie MyBoolVariable:', data);
-
-                // Aktualizujemy wyświetlacz MyBoolVariable (opcjonalne)
                 document.getElementById('my-bool-variable-display').textContent = data.MyBoolVariable;
+
+                // Aktualizacja koloru przycisku po kliknięciu
+                updateButtonColor(data.MyBoolVariable);
 
             } catch (error) {
                 console.error('Błąd podczas zmiany MyBoolVariable:', error);
             }
         });
+
+        // Funkcja do aktualizacji koloru przycisku
+        function updateButtonColor(myBoolVariable) {
+            const button = document.getElementById('toggle-bool-button');
+            button.className = myBoolVariable ? 'toggle-button-true' : 'toggle-button-false';
+        }
+
     </script>
 }
+
+<style>
+    .toggle-button-true {
+        background-color: darkgray;
+        color: white;
+    }
+
+    .toggle-button-false {
+        background-color: lightgray;
+        color: black;
+    }
+</style>

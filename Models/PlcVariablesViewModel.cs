@@ -1,4 +1,6 @@
-﻿namespace WebApplication2.Models
+﻿using System.Collections.Generic; // Dodajemy using dla Dictionary
+
+namespace WebApplication2.Models
 {
     public class PlcVariablesViewModel
     {
@@ -9,5 +11,7 @@
         public int iPressure { get; set; }
         public bool MomentarySwitch { get; set; }
         public bool ToggleSwitch { get; set; }
+
+        public Dictionary<string, bool> ButtonStates { get; set; } = new Dictionary<string, bool>(); // Dodajemy słownik
     }
 }
