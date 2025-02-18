@@ -122,6 +122,9 @@ public class PlcHub : Hub
                 case "MyGVL.ToggleSwitch":
                     await _plcService.WriteVariableAsync("MyGVL.ToggleSwitch", viewModel.ToggleSwitch);
                     break;
+                case "MyGVL.iCounter":
+                    await _plcService.WriteVariableAsync("MyGVL.iCounter", viewModel.iCounter);
+                    break;
                 default:
                     _logger.LogWarning($"Nieobsługiwana zmienna: {variableName}");
                     await Clients.Caller.SendAsync("BladZapisu", variableName, "Nieobsługiwana zmienna.");
