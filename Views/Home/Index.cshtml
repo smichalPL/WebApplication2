@@ -51,6 +51,8 @@
 
 <button id="toggle-bool-button" class="toggle-button-@Model.MyBoolVariable">Zmień MyBoolVariable</button>
 
+<button id="momentary-button">Momentary Button</button>
+
 <div id="error-message" style="display:none; color:red;"></div>
 
 @section Scripts {
@@ -156,7 +158,82 @@
             }
         }
 
-        
+
+
+        // ... (poprzedni kod JavaScript bez zmian)
+
+        // Dodajemy obsługę zdarzeń dla nowego przycisku
+        let momentaryButton = document.getElementById('momentary-button');
+        let isMomentaryButtonPressed = false;
+        let momentaryButtonInterval;
+
+        momentaryButton.addEventListener('mousedown', () => {
+            isMomentaryButtonPressed = true;
+            setVariableTo1(); // Funkcja, którą zdefiniujemy poniżej
+
+            momentaryButtonInterval = setInterval(() => {
+                if (isMomentaryButtonPressed) {
+                    setVariableTo1();
+                }
+            }, 100); // Wysyłaj co 100ms (opcjonalne)
+        });
+
+        momentaryButton.addEventListener('mouseup', () => {
+            isMomentaryButtonPressed = false;
+            setVariableTo0(); // Funkcja, którą zdefiniujemy poniżej
+            clearInterval(momentaryButtonInterval);
+        });
+
+        // Obsługa dotyku (opcjonalne):
+        momentaryButton.addEventListener('touchstart', () => {
+            isMomentaryButtonPressed = true;
+            setVariableTo1();
+
+            momentaryButtonInterval = setInterval(() => {
+                if (isMomentaryButtonPressed) {
+                    setVariableTo1();
+                }
+            }, 100);
+        });
+
+        momentaryButton.addEventListener('touchend', () => {
+            isMomentaryButtonPressed = false;
+            setVariableTo0();
+            clearInterval(momentaryButtonInterval);
+        });
+
+        async function setVariableTo1() {
+            try {
+                const response = await fetch('/SetMomentarySwitchToTrue', { // Zmieniono na /SetMomentarySwitchToTrue
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({})
+                });
+
+                // ... (reszta funkcji setVariableTo1 bez zmian)
+            } catch (error) {
+                console.error('Błąd podczas ustawiania zmiennej na 1:', error);
+            }
+        }
+
+        async function setVariableTo0() {
+            try {
+                const response = await fetch('/SetMomentarySwitchToFalse', { // Zmieniono na /SetMomentarySwitchToFalse
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({})
+                });
+
+                // ... (reszta funkcji setVariableTo0 bez zmian)
+            } catch (error) {
+                console.error('Błąd podczas ustawiania zmiennej na 0:', error);
+            }
+        }
+        // ... (reszta kodu JavaScript bez zmian)
 
         // Funkcja do aktualizacji koloru przycisku
         function updateButtonColor(myBoolVariable) {

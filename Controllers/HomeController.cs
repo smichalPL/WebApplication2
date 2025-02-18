@@ -23,13 +23,7 @@ namespace WebApplication2.Controllers
             var model = new PlcVariablesViewModel();
             try
             {
-                model.MyBoolVariable = _plcService.ReadVariableAsync<bool>("MyGVL.MyBoolVariable").Result;
-                model.iCounter = _plcService.ReadVariableAsync<int>("MyGVL.iCounter").Result;
-                model.sTekst = _plcService.ReadVariableAsync<string>("MyGVL.sTekst").Result;
-                model.iTemperature = _plcService.ReadVariableAsync<int>("MyGVL.iTemperature").Result;
-                model.iPressure = _plcService.ReadVariableAsync<int>("MyGVL.iPressure").Result;
-                model.MomentarySwitch = _plcService.ReadVariableAsync<bool>("MyGVL.MomentarySwitch").Result;
-                model.ToggleSwitch = _plcService.ReadVariableAsync<bool>("MyGVL.ToggleSwitch").Result;
+                model = GetPlcVariables(); // Pobieramy dane z PLC do modelu
             }
             catch (Exception ex)
             {
@@ -42,53 +36,43 @@ namespace WebApplication2.Controllers
         [Route("json")]
         public async Task<IActionResult> Json()
         {
-            var model = new PlcVariablesViewModel();
             try
             {
-                model.MyBoolVariable = await _plcService.ReadVariableAsync<bool>("MyGVL.MyBoolVariable");
-                model.iCounter = await _plcService.ReadVariableAsync<int>("MyGVL.iCounter");
-                model.sTekst = await _plcService.ReadVariableAsync<string>("MyGVL.sTekst");
-                model.iTemperature = await _plcService.ReadVariableAsync<int>("MyGVL.iTemperature");
-                model.iPressure = await _plcService.ReadVariableAsync<int>("MyGVL.iPressure");
-                model.MomentarySwitch = await _plcService.ReadVariableAsync<bool>("MyGVL.MomentarySwitch");
-                model.ToggleSwitch = await _plcService.ReadVariableAsync<bool>("MyGVL.ToggleSwitch");
+                var model = GetPlcVariables(); // Pobieramy dane z PLC do modelu
+                return Json(model);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Błąd odczytu z PLC w kontrolerze.");
-                model.sTekst = "Błąd odczytu";
+                return StatusCode(500); // Zwracamy kod błędu
             }
-
-            var data = new
-            {
-                MyBoolVariable = model.MyBoolVariable,
-                iCounter = model.iCounter,
-                sTekst = model.sTekst,
-                iTemperature = model.iTemperature,
-                iPressure = model.iPressure,
-                MomentarySwitch = model.MomentarySwitch,
-                ToggleSwitch = model.ToggleSwitch
-            };
-            return Json(data);
         }
+
+        private PlcVariablesViewModel GetPlcVariables() // Funkcja do pobierania danych z PLC
+        {
+            var model = new PlcVariablesViewModel();
+            model.MyBoolVariable = _plcService.ReadVariableAsync<bool>("P_Bedroom.bLampSwitchLeftHMI").Result;
+            model.iCounter = _plcService.ReadVariableAsync<int>("MyGVL.iCounter").Result;
+            model.sTekst = _plcService.ReadVariableAsync<string>("MyGVL.sTekst").Result;
+            model.iTemperature = _plcService.ReadVariableAsync<int>("MyGVL.iTemperature").Result;
+            model.iPressure = _plcService.ReadVariableAsync<int>("MyGVL.iPressure").Result;
+            model.MomentarySwitch = _plcService.ReadVariableAsync<bool>("MyGVL.MomentarySwitch").Result;
+            model.ToggleSwitch = _plcService.ReadVariableAsync<bool>("MyGVL.ToggleSwitch").Result;
+            return model;
+        }
+
 
         [HttpPost("/toggleBool")]
         public async Task<IActionResult> ToggleBool()
         {
             try
             {
-                bool myBoolVariable = await _plcService.ReadVariableAsync<bool>("MyGVL.MyBoolVariable");
+                bool myBoolVariable = await _plcService.ReadVariableAsync<bool>("P_Bedroom.bLampSwitchLeftHMI");
                 myBoolVariable = !myBoolVariable;
-                await _plcService.WriteVariableAsync("MyGVL.MyBoolVariable", myBoolVariable);
+                await _plcService.WriteVariableAsync("P_Bedroom.bLampSwitchLeftHMI", myBoolVariable);
 
-                var model = new PlcVariablesViewModel();
-                model.MyBoolVariable = myBoolVariable;
-                model.iCounter = await _plcService.ReadVariableAsync<int>("MyGVL.iCounter");
-                model.sTekst = await _plcService.ReadVariableAsync<string>("MyGVL.sTekst");
-                model.iTemperature = await _plcService.ReadVariableAsync<int>("MyGVL.iTemperature");
-                model.iPressure = await _plcService.ReadVariableAsync<int>("MyGVL.iPressure");
-                model.MomentarySwitch = await _plcService.ReadVariableAsync<bool>("MyGVL.MomentarySwitch");
-                model.ToggleSwitch = await _plcService.ReadVariableAsync<bool>("MyGVL.ToggleSwitch");
+                var model = GetPlcVariables(); // Pobieramy aktualne dane z PLC
+                model.MyBoolVariable = myBoolVariable; // Ustawiamy zaktualizowaną wartość
 
                 return Json(model);
             }
@@ -100,18 +84,16 @@ namespace WebApplication2.Controllers
         }
 
         [HttpPost("/updatePressure")]
-        public async Task<IActionResult> UpdatePressure([FromBody] PressureData data) // Odbieramy dane z JSON-a
+        public async Task<IActionResult> UpdatePressure([FromBody] PressureData data)
         {
             try
             {
-                await _plcService.WriteVariableAsync("MyGVL.iPressure", data.iPressure); // Zapisujemy do PLC
+                await _plcService.WriteVariableAsync("MyGVL.iPressure", data.iPressure);
 
-                // Opcjonalnie: odczytujemy i zwracamy zaktualizowane dane (JSON)
-                var model = new PlcVariablesViewModel();
-                model.iPressure = await _plcService.ReadVariableAsync<int>("MyGVL.iPressure");
-                // ... odczyt innych zmiennych ...
+                var model = GetPlcVariables(); // Pobieramy aktualne dane z PLC
+                model.iPressure = data.iPressure; // Ustawiamy zaktualizowaną wartość
 
-                return Json(model); // Zwracamy zaktualizowane dane
+                return Json(model);
             }
             catch (Exception ex)
             {
@@ -120,7 +102,36 @@ namespace WebApplication2.Controllers
             }
         }
 
-        // Klasa pomocnicza do deserializacji JSON-a
+        [HttpPost("/SetMomentarySwitchToTrue")] // Poprawiona nazwa akcji
+        public async Task<IActionResult> SetMomentarySwitchToTrue()
+        {
+            try
+            {
+                await _plcService.WriteVariableAsync("MyGVL.MomentarySwitch", true);
+                return Json(new { Message = "MomentarySwitch ustawiona na true" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Błąd podczas ustawiania MomentarySwitch na true: {ex.Message}");
+                return StatusCode(500);
+            }
+        }
+
+        [HttpPost("/SetMomentarySwitchToFalse")] // Poprawiona nazwa akcji
+        public async Task<IActionResult> SetMomentarySwitchToFalse()
+        {
+            try
+            {
+                await _plcService.WriteVariableAsync("MyGVL.MomentarySwitch", false);
+                return Json(new { Message = "MomentarySwitch ustawiona na false" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Błąd podczas ustawiania MomentarySwitch na false: {ex.Message}");
+                return StatusCode(500);
+            }
+        }
+
         public class PressureData
         {
             public int iPressure { get; set; }

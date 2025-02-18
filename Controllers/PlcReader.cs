@@ -19,13 +19,13 @@ namespace PlcVariableReader
         // Prefiks "MyGVL." ZOSTAŁ dodany z powrotem.
         private static Dictionary<string, Type> _plcVariables = new Dictionary<string, Type>()
         {
-            { "MyGVL.MyBoolVariable", typeof(bool) },
+            { "P_Bedroom.bLampSwitchLeftHMI", typeof(bool) },
             { "MyGVL.iCounter", typeof(Int32) },
             { "MyGVL.sTekst", typeof(string) },
             { "MyGVL.iTemperature", typeof(Int32) },
             { "MyGVL.iPressure", typeof(Int32) },
             { "MyGVL.MomentarySwitch", typeof(bool) },
-            { "MyGVL.ToggleSwitch", typeof(bool) }
+            { "MyGVL.ToggleSwitch", typeof(bool) } //P_Bedroom.bLampSwitchLeftHMI
         };
 
         public PlcReader(IOptions<PlcConfiguration> plcConfiguration, ILogger<PlcReader> logger)

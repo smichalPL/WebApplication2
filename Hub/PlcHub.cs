@@ -107,8 +107,8 @@ public class PlcHub : Hub
                 case "MyGVL.iPressure":
                     await _plcService.WriteVariableAsync("MyGVL.iPressure", viewModel.iPressure);
                     break;
-                case "MyGVL.MyBoolVariable":
-                    await _plcService.WriteVariableAsync("MyGVL.MyBoolVariable", viewModel.MyBoolVariable);
+                case "P_Bedroom.bLampSwitchLeftHMI":
+                    await _plcService.WriteVariableAsync("P_Bedroom.bLampSwitchLeftHMI", viewModel.MyBoolVariable);
                     break;
                 case "MyGVL.sTekst":
                     await _plcService.WriteVariableAsync("MyGVL.sTekst", viewModel.sTekst);
