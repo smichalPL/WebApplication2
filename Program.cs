@@ -1,31 +1,32 @@
 using PlcVariableReader;
-using Microsoft.Extensions.Logging; // Dodajemy using dla ILogger
+using Microsoft.Extensions.Logging;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Konfiguracja logowania - **DODAJ TO!**
-builder.Logging.ClearProviders(); // Opcjonalnie czyœcimy domyœlne providery
-builder.Logging.AddConsole(); // Dodajemy logowanie do konsoli
-builder.Logging.AddDebug(); // Dodajemy logowanie do debuggera
-//builder.Logging.AddFile("logs/mylog-.txt", rollingInterval: RollingInterval.Day); // Dodajemy logowanie do pliku (opcjonalnie)
+// Konfiguracja logowania
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+builder.Logging.AddDebug();
+// builder.Logging.AddFile("logs/mylog-.txt", rollingInterval: RollingInterval.Day); // Opcjonalnie
 
-// Dodajemy rejestracjê PlcReader - **TO JEST KLUCZOWE**
-builder.Services.Configure<PlcConfiguration>(builder.Configuration.GetSection("PlcConfiguration")); // Rejestrujemy konfiguracjê
-builder.Services.AddTransient<PlcReader>();  // Dodajemy PlcReader do kontenera DI
+// Rejestracja PlcConfiguration
+builder.Services.Configure<PlcConfiguration>(builder.Configuration.GetSection("PlcConfiguration"));
 
-// Dodajemy rejestracjê PlcService - **DODANO**
+// Rejestracja PlcReader
+builder.Services.AddTransient<PlcReader>();
+
+// Rejestracja PlcService
 builder.Services.AddTransient<PlcService>();
 
-// Dodajemy SignalR - **NAJPIERW REJESTRACJA US£UG!**
+// Rejestracja SignalR
 builder.Services.AddSignalR();
 
-// Add services to the container. (bez zmian)
+// Dodajemy us³ugi MVC
 builder.Services.AddControllersWithViews();
-
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline. (bez zmian)
+// Konfiguracja HTTP request pipeline
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -40,10 +41,10 @@ app.UseRouting();
 app.UseAuthorization();
 
 app.MapControllerRoute(
- name: "default",
- pattern: "{controller=Home}/{action=Index}/{id?}");
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}");
 
-// Mapujemy Hub na URL - **DOPIERO PO REJESTRACJI US£UG!**
-app.MapHub<PlcHub>("/plchub"); // To musi byæ po app.UseRouting()
+// Mapowanie Hubu
+app.MapHub<PlcHub>("/plchub");
 
 app.Run();

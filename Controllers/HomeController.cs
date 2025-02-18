@@ -39,8 +39,9 @@ namespace WebApplication2.Controllers
             {
                 _logger.LogError(ex, "Błąd odczytu z PLC.");
                 ViewData["ErrorMessage"] = ex.Message;
-                var emptyModel = new PlcVariablesViewModel(); // Utwórz pusty model
-                return View(emptyModel); // Przekaż pusty model do widoku
+                // var emptyModel = new PlcVariablesViewModel(); // Utwórz pusty model
+                // return View(emptyModel); // Przekaż pusty model do widoku
+                return View(); // Przekazanie modelu do widoku
             }
         }
 

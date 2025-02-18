@@ -65,6 +65,14 @@
 
     <script>
         $(document).ready(function () {
+            // Definicja funkcji aktualizujDane *PRZED* jej wywołaniem
+            function aktualizujDane() {
+                console.log("Wywołano aktualizujDane()");
+                connection.invoke("OdczytajZmienne", "TwojaGrupa", ["MyGVL.MyBoolVariable", "MyGVL.iCounter", "MyGVL.sTekst", "MyGVL.iTemperature", "MyGVL.iPressure", "MyGVL.MomentarySwitch", "MyGVL.ToggleSwitch"])
+                    .then(() => console.log("Wywołano OdczytajZmienne w hubie."))
+                    .catch(err => console.error("Błąd wywołania OdczytajZmienne:", err));
+            }
+
             let connection = new signalR.HubConnectionBuilder()
                 .withUrl("/plchub", { transport: signalR.HttpTransportType.WebSockets })
                 .build();
@@ -72,28 +80,29 @@
             connection.start()
                 .then(() => {
                     console.log("Połączono z Hubem.");
-                    aktualizujDane();
+                    aktualizujDane(); // Wywołanie funkcji *PO* jej definicji
                 })
                 .catch(err => console.error("Błąd połączenia:", err));
 
-            cconnection.on("OtrzymajDane", function (viewModel) {
-                console.log("Odebrano dane:", viewModel); // Logujemy cały obiekt viewModel
-                console.log("iCounter:", viewModel.iCounter); // Logujemy tylko wartość iCounter
+            connection.on("OtrzymajDane", function (data) {
+                console.log("Odebrano dane:", data);
 
-                $("#my-bool-variable-display").text(viewModel.MyBoolVariable);
-                //$("#i-counter-display").text(viewModel.iCounter);
-                $("#i-counter-display").html(viewModel.iCounter); // Aktualizujemy widok (spróbuj .html())
-                console.log("Zaktualizowano widok iCounter:", $("#i-counter-display").text()); // Logujemy wartość po aktualizacji widoku
-                $("#s-tekst-display").text(viewModel.sTekst);
-                $("#i-temperature-display").text(viewModel.iTemperature);
-                $("#i-pressure-display").text(viewModel.iPressure);
-                $("#momentary-switch-display").text(viewModel.MomentarySwitch);
-                $("#toggle-switch-display").text(viewModel.ToggleSwitch);
+                for (const variableName in data) {
+                    const value = data[variableName];
+                    console.log(`${variableName}: ${value}`);
 
-                $("#my-bool-variable").prop("checked", viewModel.MyBoolVariable);
-                $("#momentary-switch").prop("checked", viewModel.MomentarySwitch);
-                $("#toggle-switch").prop("checked", viewModel.ToggleSwitch);
+                    const displayElement = $(`#${variableName.toLowerCase().replace('.', '-')}-display`);
+                    if (displayElement.length) {
+                        displayElement.text(value);
+                    } else {
+                        console.warn(`Element wyświetlający dla ${variableName} nie istnieje.`);
+                    }
 
+                    const checkboxElement = $(`#${variableName.toLowerCase().replace('.', '-')}`);
+                    if (checkboxElement.length && typeof value === 'boolean') {
+                        checkboxElement.prop("checked", value);
+                    }
+                }
                 $("#error-message").hide();
             });
 
@@ -103,12 +112,6 @@
                 $("#error-message").show();
             });
 
-            function aktualizujDane() {
-                console.log("Wywołano aktualizujDane()");
-                connection.invoke("AktualizujDane", "TwojaGrupa")
-                    .then(() => console.log("Wywołano AktualizujDane w hubie.")) // Dodajemy logowanie po pomyślnym wywołaniu
-                    .catch(err => console.error("Błąd wywołania AktualizujDane:", err));
-            }
 
             const intervalId = setInterval(aktualizujDane, 2000);
 
@@ -138,7 +141,6 @@
                     return;
                 }
 
-                // Iterujemy po właściwościach viewModel i zapisujemy każdą zmienną oddzielnie
                 for (const variableName in viewModel) {
                     connection.invoke("ZapiszDane", "TwojaGrupa", "MyGVL." + variableName, JSON.stringify(viewModel))
                         .then(() => console.log(`Zapisano ${variableName}`))
@@ -152,7 +154,6 @@
 
             connection.on("DaneZapisane", function (variableName, viewModel) {
                 console.log(`Zapisano wartość do zmiennej '${variableName}'.`, viewModel);
-                // Aktualizujemy tylko te pola, które zostały zmienione
                 $("#my-bool-variable-display").text(viewModel.MyBoolVariable);
                 $("#i-counter-display").text(viewModel.iCounter);
                 $("#s-tekst-display").text(viewModel.sTekst);
@@ -171,7 +172,6 @@
                 $("#error-message").text(`Błąd zapisu do zmiennej '${variableName}': ` + error);
                 $("#error-message").show();
             });
-
         });
     </script>
 }

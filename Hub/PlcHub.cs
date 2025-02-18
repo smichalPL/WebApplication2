@@ -35,7 +35,7 @@ public class PlcHub : Hub
 
     public async Task OdczytajZmienne(string grupa, List<string> nazwyZmiennych)
     {
-        _logger.LogInformation("Wywołano metodę AktualizujDane.");
+        _logger.LogInformation("Wywołano metodę OdczytajZmienne.");
         try
         {
          //   bool boolValue = await _plcService.ReadVariableAsync<bool>("MyGVL.MyBoolVariable");
