@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.SignalR;
+﻿/*using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Threading.Tasks;
@@ -150,4 +150,4 @@ public class PlcHub : Hub
             await Clients.Caller.SendAsync("BladZapisu", variableName, $"Wystąpił błąd: {ex.Message}");
         }
     }
-}
+}*/

@@ -19,7 +19,7 @@ builder.Services.AddTransient<PlcReader>();
 builder.Services.AddTransient<PlcService>();
 
 // Rejestracja SignalR
-builder.Services.AddSignalR();
+//builder.Services.AddSignalR();
 
 // Dodajemy us³ugi MVC *i konfigurujemy JSON options*
 builder.Services.AddControllersWithViews()
@@ -49,6 +49,6 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 // Mapowanie Hubu
-app.MapHub<PlcHub>("/plchub");
+//app.MapHub<PlcHub>("/plchub");
 
 app.Run();
