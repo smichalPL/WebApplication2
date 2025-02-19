@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using PlcVariableReader; // Upewnij się, że masz ten using
+using PlcVariableReader;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using WebApplication2.Models;

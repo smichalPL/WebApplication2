@@ -16,7 +16,6 @@ namespace PlcVariableReader
         private readonly ILogger<PlcReader> _logger;
 
         // Klucze w słowniku MUSZĄ być dokładnie takie same, jak nazwy zmiennych w PLC!
-        // Prefiks "MyGVL." ZOSTAŁ dodany z powrotem.
         private static Dictionary<string, Type> _plcVariables = new Dictionary<string, Type>()
         {
             { "P_Bedroom.bLampSwitchLeftHMI", typeof(bool) },
@@ -25,7 +24,7 @@ namespace PlcVariableReader
             { "MyGVL.iTemperature", typeof(Int32) },
             { "MyGVL.iPressure", typeof(Int32) },
             { "MyGVL.MomentarySwitch", typeof(bool) },
-            { "MyGVL.ToggleSwitch", typeof(bool) } //P_Bedroom.bLampSwitchLeftHMI
+            { "MyGVL.ToggleSwitch", typeof(bool) }
         };
 
         public PlcReader(IOptions<PlcConfiguration> plcConfiguration, ILogger<PlcReader> logger)
