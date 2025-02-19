@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using PlcVariableReader;
+using PlcVariableReader; // Upewnij się, że masz ten using
 using System.Diagnostics;
 using System.Threading.Tasks;
 using WebApplication2.Models;
@@ -10,7 +10,7 @@ namespace WebApplication2.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
-        private readonly PlcService _plcService;
+        private readonly PlcService _plcService; // Upewnij się, że masz ten serwis
 
         public HomeController(ILogger<HomeController> logger, PlcService plcService)
         {
@@ -18,12 +18,12 @@ namespace WebApplication2.Controllers
             _plcService = plcService;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index() // Dodajemy async
         {
             var model = new PlcVariablesViewModel();
             try
             {
-                model = GetPlcVariables(); // Pobieramy dane z PLC do modelu
+                model = await GetPlcVariables(); // Dodajemy await
             }
             catch (Exception ex)
             {
@@ -34,33 +34,40 @@ namespace WebApplication2.Controllers
         }
 
         [Route("json")]
-        public async Task<IActionResult> Json()
+        public async Task<IActionResult> Json() // Dodajemy async
         {
             try
             {
-                var model = GetPlcVariables(); // Pobieramy dane z PLC do modelu
+                var model = await GetPlcVariables(); // Dodajemy await
                 return Json(model);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Błąd odczytu z PLC w kontrolerze.");
-                return StatusCode(500); // Zwracamy kod błędu
+                return StatusCode(500);
             }
         }
 
-        private PlcVariablesViewModel GetPlcVariables() // Funkcja do pobierania danych z PLC
+        private async Task<PlcVariablesViewModel> GetPlcVariables() // Dodajemy async Task
         {
             var model = new PlcVariablesViewModel();
-            model.MyBoolVariable = _plcService.ReadVariableAsync<bool>("P_Bedroom.bLampSwitchLeftHMI").Result;
-            model.iCounter = _plcService.ReadVariableAsync<int>("MyGVL.iCounter").Result;
-            model.sTekst = _plcService.ReadVariableAsync<string>("MyGVL.sTekst").Result;
-            model.iTemperature = _plcService.ReadVariableAsync<int>("MyGVL.iTemperature").Result;
-            model.iPressure = _plcService.ReadVariableAsync<int>("MyGVL.iPressure").Result;
-            model.MomentarySwitch = _plcService.ReadVariableAsync<bool>("MyGVL.MomentarySwitch").Result;
-            model.ToggleSwitch = _plcService.ReadVariableAsync<bool>("MyGVL.ToggleSwitch").Result;
+            try // Dodajemy try-catch
+            {
+                model.MyBoolVariable = await _plcService.ReadVariableAsync<bool>("P_Bedroom.bLampSwitchLeftHMI");
+                model.iCounter = await _plcService.ReadVariableAsync<int>("MyGVL.iCounter");
+                model.sTekst = await _plcService.ReadVariableAsync<string>("MyGVL.sTekst");
+                model.iTemperature = await _plcService.ReadVariableAsync<int>("MyGVL.iTemperature");
+                model.iPressure = await _plcService.ReadVariableAsync<int>("MyGVL.iPressure");
+                model.MomentarySwitch = await _plcService.ReadVariableAsync<bool>("MyGVL.MomentarySwitch");
+                model.ToggleSwitch = await _plcService.ReadVariableAsync<bool>("MyGVL.ToggleSwitch");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Błąd w GetPlcVariables: " + ex.Message);
+                model.sTekst = "Błąd odczytu";
+            }
             return model;
         }
-
 
         [HttpPost("/toggleBool")]
         public async Task<IActionResult> ToggleBool()
@@ -71,8 +78,8 @@ namespace WebApplication2.Controllers
                 myBoolVariable = !myBoolVariable;
                 await _plcService.WriteVariableAsync("P_Bedroom.bLampSwitchLeftHMI", myBoolVariable);
 
-                var model = GetPlcVariables(); // Pobieramy aktualne dane z PLC
-                model.MyBoolVariable = myBoolVariable; // Ustawiamy zaktualizowaną wartość
+                var model = await GetPlcVariables(); // Dodajemy await
+                model.MyBoolVariable = myBoolVariable;
 
                 return Json(model);
             }
@@ -90,8 +97,8 @@ namespace WebApplication2.Controllers
             {
                 await _plcService.WriteVariableAsync("MyGVL.iPressure", data.iPressure);
 
-                var model = GetPlcVariables(); // Pobieramy aktualne dane z PLC
-                model.iPressure = data.iPressure; // Ustawiamy zaktualizowaną wartość
+                var model = await GetPlcVariables(); // Dodajemy await
+                model.iPressure = data.iPressure;
 
                 return Json(model);
             }
@@ -102,7 +109,7 @@ namespace WebApplication2.Controllers
             }
         }
 
-        [HttpPost("/SetMomentarySwitchToTrue")] // Poprawiona nazwa akcji
+        [HttpPost("/SetMomentarySwitchToTrue")]
         public async Task<IActionResult> SetMomentarySwitchToTrue()
         {
             try
@@ -117,7 +124,7 @@ namespace WebApplication2.Controllers
             }
         }
 
-        [HttpPost("/SetMomentarySwitchToFalse")] // Poprawiona nazwa akcji
+        [HttpPost("/SetMomentarySwitchToFalse")]
         public async Task<IActionResult> SetMomentarySwitchToFalse()
         {
             try
@@ -138,55 +145,29 @@ namespace WebApplication2.Controllers
         }
 
         public IActionResult Privacy()
-
         {
-
             return View();
-
         }
-
-
 
         public IActionResult Room1()
-
         {
-
             return View();
-
         }
-
-
 
         public IActionResult Room2()
-
         {
-
             return View();
-
         }
-
-
 
         public IActionResult Irrigation()
-
         {
-
             return View();
-
         }
-
-
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-
         public IActionResult Error()
-
         {
-
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-
         }
-
     }
-
 }
