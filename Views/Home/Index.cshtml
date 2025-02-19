@@ -3,6 +3,9 @@
 @{
     ViewData["Title"] = "Home";
 }
+<head>
+    <link rel="stylesheet" href="~/css/style.css" />
+</head>
 
 <div id="numeric-keyboard" style="display: none;">
     <table>
@@ -29,8 +32,7 @@
     </table>
 </div>
 
-<input type="hidden" id="pressure-input" value="">
-<input type="hidden" id="pressure-input" value="">
+
 
 <h1>@ViewData["Title"]</h1>
 
@@ -160,7 +162,6 @@
 
 
 
-        // ... (poprzedni kod JavaScript bez zmian)
 
         // Dodajemy obsługę zdarzeń dla nowego przycisku
         let momentaryButton = document.getElementById('momentary-button');
@@ -212,7 +213,6 @@
                     body: JSON.stringify({})
                 });
 
-                // ... (reszta funkcji setVariableTo1 bez zmian)
             } catch (error) {
                 console.error('Błąd podczas ustawiania zmiennej na 1:', error);
             }
@@ -228,79 +228,35 @@
                     body: JSON.stringify({})
                 });
 
-                // ... (reszta funkcji setVariableTo0 bez zmian)
             } catch (error) {
                 console.error('Błąd podczas ustawiania zmiennej na 0:', error);
             }
         }
-        // ... (reszta kodu JavaScript bez zmian)
 
         // Funkcja do aktualizacji koloru przycisku
         function updateButtonColor(myBoolVariable) {
             const button = document.getElementById('toggle-bool-button');
             button.className = myBoolVariable ? 'toggle-button-true' : 'toggle-button-false';
         }
+        // Momentary Button - Dodajemy obsługę zmiany koloru
+       
+        momentaryButton.addEventListener('mousedown', () => {
+            momentaryButton.classList.add('pressed'); // Dodajemy klasę "pressed"
+        });
+
+        momentaryButton.addEventListener('mouseup', () => {
+            momentaryButton.classList.remove('pressed'); // Usuwamy klasę "pressed"
+        });
+
+        // Opcjonalnie: Dodajemy obsługę dotyku dla urządzeń mobilnych
+        momentaryButton.addEventListener('touchstart', () => {
+            momentaryButton.classList.add('pressed'); // Dodajemy klasę "pressed"
+        });
+
+        momentaryButton.addEventListener('touchend', () => {
+            momentaryButton.classList.remove('pressed'); // Usuwamy klasę "pressed"
+        });
+
 
     </script>
 }
-
-<style>
-    .toggle-button-true {
-        background-color: darkgray;
-        color: white;
-    }
-
-    .toggle-button-false {
-        background-color: lightgray;
-        color: black;
-    }
-
-    #i-pressure-display {
-        cursor: pointer;
-        text-decoration: underline;
-    }
-
-    #numeric-keyboard {
-        position: absolute;
-        background-color: #eee;
-        border: 2px solid #ccc;
-        padding: 15px;
-        z-index: 1000;
-        box-shadow: 5px 5px 10px rgba(0,0,0,0.3);
-        border-radius: 10px;
-    }
-
-    #numeric-keyboard table {
-            border-collapse: collapse;
-            width: auto;
-    }
-
-    #numeric-keyboard table tr td button {
-            color: black !important; /* Dodajemy !important, aby upewnić się, że ten styl będzie miał najwyższy priorytet */
-            font-size: 1rem; /* Zmniejszamy rozmiar czcionki */
-            width: 50px;
-            height: 50px;
-            margin: 8px;
-            border: none;
-            background-color: #fff;
-            cursor: pointer;
-            font-size: 20px;
-            border-radius: 5px;
-            box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
-            /* Dodajemy kontrastowy kolor czcionki - ciemny szary lub czarny */
-            color: darkgrey; /* Można też użyć #000 dla czarnego */
-    }
-
-    #zatwierdz, #cofnij {
-        width: 108px;
-        background-color: #4CAF50;
-        /* Zmieniamy kolor czcionki na biały, bo przycisk jest zielony */
-        color: white;
-    }
-
-    #cofnij {
-        background-color: #f44336;
-        /* Zmieniamy kolor czcionki na biały, bo przycisk jest czerwony */
-        color: white;
-    }
-</style>
