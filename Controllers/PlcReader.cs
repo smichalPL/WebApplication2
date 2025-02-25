@@ -19,6 +19,13 @@ namespace PlcVariableReader
         private static Dictionary<string, Type> _plcVariables = new Dictionary<string, Type>()
         {
             { "P_Bedroom.bLampSwitchLeftHMI", typeof(bool) },
+            { "P_Bedroom.bWallSocketHMI", typeof(bool) },
+            { "P_Bedroom.bFacadeBlindsUpHMI", typeof(bool) },
+            { "P_Bedroom.bFacadeBlindsDownHMI", typeof(bool) },
+            { "P_Bedroom.bFacadeBlindsStopHMI", typeof(bool) },
+            { "GVL_IO.X_BedroomWindowOpenSensor", typeof(bool) },
+            { "GVL_IO.Y_BedroomLampRelayCeiling", typeof(bool) },
+
             { "MyGVL.iCounter", typeof(Int32) },
             { "MyGVL.sTekst", typeof(string) },
             { "MyGVL.iTemperature", typeof(Int32) },

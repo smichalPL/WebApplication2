@@ -2,13 +2,13 @@
 {
     public class BathroomViewModel
     {
-        public bool LampSwitchLeftHMI { get; set; }
-        public bool WallSocketHMI { get; set; }
-        public bool FacadeBlindsUpHMI { get; set; }
-        public bool FacadeBlindsDownHMI { get; set; }
-        public bool FacadeBlindsStopHMI { get; set; }
-        public bool LampRelayCeiling { get; set; }
-        public bool WindowOpenSensor { get; set; }
+        public bool lampSwitchLeftHMI { get; set; }
+        public bool wallSocketHMI { get; set; }
+        public bool facadeBlindsUpHMI { get; set; }
+        public bool facadeBlindsDownHMI { get; set; }
+        public bool facadeBlindsStopHMI { get; set; }
+        public bool lampRelayCeiling { get; set; }
+        public bool windowOpenSensor { get; set; }
         // ... inne zmienne dla łazienki
     }
 }

@@ -60,7 +60,7 @@
 @section Scripts {
     <script>
         async function refresh() {
-            const request = await fetch('/json');
+            const request = await fetch('/home/json');
             const data = await request.json();
 
             console.log('Nasze dane', data);
@@ -75,7 +75,7 @@
 
         document.getElementById('toggle-bool-button').addEventListener('click', async () => {
             try {
-                const response = await fetch('/toggleBool', {
+                const response = await fetch('/home/toggleBool', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -137,7 +137,7 @@
 
         async function saveNewPressureValue(newValue) {
             try {
-                const response = await fetch('/updatePressure', { // Nowy endpoint w kontrolerze
+                const response = await fetch('/home/updatePressure', { // Nowy endpoint w kontrolerze
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -205,7 +205,7 @@
 
         async function setVariableTo1() {
             try {
-                const response = await fetch('/SetMomentarySwitchToTrue', { // Zmieniono na /SetMomentarySwitchToTrue
+                const response = await fetch('/home/SetMomentarySwitchToTrue', { // Zmieniono na /SetMomentarySwitchToTrue
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -220,7 +220,7 @@
 
         async function setVariableTo0() {
             try {
-                const response = await fetch('/SetMomentarySwitchToFalse', { // Zmieniono na /SetMomentarySwitchToFalse
+                const response = await fetch('/home/SetMomentarySwitchToFalse', { // Zmieniono na /SetMomentarySwitchToFalse
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
