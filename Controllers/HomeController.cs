@@ -149,12 +149,12 @@ namespace WebApplication2.Controllers
             return View();
         }
 
-        public IActionResult Room1()
+        public IActionResult Bedroom()
         {
             return View();
         }
 
-        public IActionResult Room2()
+        public IActionResult Bathroom()
         {
             return View();
         }
