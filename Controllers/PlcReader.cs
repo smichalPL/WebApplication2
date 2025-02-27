@@ -26,6 +26,7 @@ namespace PlcVariableReader
             { "GVL_IO.X_BedroomWindowOpenSensor", typeof(bool) },
             { "GVL_IO.Y_BedroomLampRelayCeiling", typeof(bool) },
 
+            { "MyGVL.MyBoolVariable", typeof(bool) },
             { "MyGVL.iCounter", typeof(Int32) },
             { "MyGVL.sTekst", typeof(string) },
             { "MyGVL.iTemperature", typeof(Int32) },

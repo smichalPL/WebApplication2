@@ -1,4 +1,5 @@
-﻿namespace WebApplication2.Models
+﻿using System.Collections.Generic; // Dodajemy using dla Dictionary
+namespace WebApplication2.Models
 {
     public class BedroomViewModel
      {
@@ -10,5 +11,7 @@
         public bool lampRelayCeiling { get; set; }
         public bool windowOpenSensor { get; set; }
         // ... inne zmienne dla sypialni
+       // public Dictionary<string, bool> ButtonStates { get; set; } = new Dictionary<string, bool>(); // Dodajemy słownik
+
     }
 }

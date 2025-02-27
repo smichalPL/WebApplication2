@@ -38,7 +38,7 @@
 
 <h2>Wartości z PLC</h2>
 
-<p>MyBoolVariable: <span id="my-bool-variable-display">@Model.MyBoolVariable</span></p>
+<p>ToggleSwitch: <span id="my-toggle-switch-display">@Model.ToggleSwitch</span></p>
 <p>iCounter: <span id="i-counter-display">@Model.iCounter</span></p>
 <p>sTekst: <span id="s-tekst-display">@Model.sTekst</span></p>
 <p>iTemperature: <span id="i-temperature-display">@Model.iTemperature</span></p>
@@ -46,14 +46,9 @@
 
 <h2>Zapis danych do PLC</h2>
 
+<button id="toggle-switch-button" class="toggle-button-@Model.ToggleSwitch">Toggle Switch</button>
 
-<input type="checkbox" id="momentary-switch">
-<label for="momentary-switch">MomentarySwitch</label>
-<br>
-
-<button id="toggle-bool-button" class="toggle-button-@Model.MyBoolVariable">Zmień MyBoolVariable</button>
-
-<button id="momentary-button">Momentary Button</button>
+<button id="momentary-button">Momentary Switch</button>
 
 <div id="error-message" style="display:none; color:red;"></div>
 
@@ -65,15 +60,15 @@
 
             console.log('Nasze dane', data);
             document.getElementById('i-counter-display').textContent = data.iCounter;
-            document.getElementById('my-bool-variable-display').textContent = data.MyBoolVariable;
+            document.getElementById('my-toggle-switch-display').textContent = data.ToggleSwitch;
 
-            // Aktualizacja koloru przycisku MyBoolVariable
-            updateButtonColor(data.MyBoolVariable);
+            // Aktualizacja koloru przycisku ToggleSwitch
+            updateButtonColor(data.ToggleSwitch);
         }
 
         setInterval(refresh, 2000);
 
-        document.getElementById('toggle-bool-button').addEventListener('click', async () => {
+        document.getElementById('toggle-switch-button').addEventListener('click', async () => {
             try {
                 const response = await fetch('/home/toggleBool', {
                     method: 'POST',
@@ -88,14 +83,14 @@
                 }
 
                 const data = await response.json();
-                console.log('Dane po zmianie MyBoolVariable:', data);
-                document.getElementById('my-bool-variable-display').textContent = data.MyBoolVariable;
+                console.log('Dane po zmianie ToggleSwitch:', data);
+                document.getElementById('my-toggle-switch-display').textContent = data.ToggleSwitch;
 
                 // Aktualizacja koloru przycisku po kliknięciu
-                updateButtonColor(data.MyBoolVariable);
+                updateButtonColor(data.ToggleSwitch);
 
             } catch (error) {
-                console.error('Błąd podczas zmiany MyBoolVariable:', error);
+                console.error('Błąd podczas zmiany ToggleSwitch:', error);
             }
         });
 
@@ -234,9 +229,9 @@
         }
 
         // Funkcja do aktualizacji koloru przycisku
-        function updateButtonColor(myBoolVariable) {
-            const button = document.getElementById('toggle-bool-button');
-            button.className = myBoolVariable ? 'toggle-button-true' : 'toggle-button-false';
+        function updateButtonColor(ToggleSwitch) {
+            const button = document.getElementById('toggle-switch-button');
+            button.className = ToggleSwitch ? 'toggle-button-true' : 'toggle-button-false';
         }
         // Momentary Button - Dodajemy obsługę zmiany koloru
        

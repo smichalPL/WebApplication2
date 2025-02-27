@@ -53,7 +53,7 @@ namespace WebApplication2.Controllers
             var model = new PlcVariablesViewModel();
             try // Dodajemy try-catch
             {
-                model.MyBoolVariable = await _plcService.ReadVariableAsync<bool>("P_Bedroom.bLampSwitchLeftHMI");
+                model.MyBoolVariable = await _plcService.ReadVariableAsync<bool>("MyGVL.MyBoolVariable");
                 model.iCounter = await _plcService.ReadVariableAsync<int>("MyGVL.iCounter");
                 model.sTekst = await _plcService.ReadVariableAsync<string>("MyGVL.sTekst");
                 model.iTemperature = await _plcService.ReadVariableAsync<int>("MyGVL.iTemperature");
@@ -74,12 +74,12 @@ namespace WebApplication2.Controllers
         {
             try
             {
-                bool myBoolVariable = await _plcService.ReadVariableAsync<bool>("P_Bedroom.bLampSwitchLeftHMI");
-                myBoolVariable = !myBoolVariable;
-                await _plcService.WriteVariableAsync("P_Bedroom.bLampSwitchLeftHMI", myBoolVariable);
+                bool toggleSwitch = await _plcService.ReadVariableAsync<bool>("MyGVL.ToggleSwitch");
+                toggleSwitch = !toggleSwitch;
+                await _plcService.WriteVariableAsync("MyGVL.ToggleSwitch", toggleSwitch);
 
                 var model = await GetPlcVariables(); // Dodajemy await
-                model.MyBoolVariable = myBoolVariable;
+                model.ToggleSwitch = toggleSwitch;
 
                 return Json(model);
             }
@@ -90,7 +90,7 @@ namespace WebApplication2.Controllers
             }
         }
 
-        [HttpPost("/home/updatePressure")]
+        [HttpPost("home/updatePressure")]
         public async Task<IActionResult> UpdatePressure([FromBody] PressureData data)
         {
             try
@@ -109,7 +109,7 @@ namespace WebApplication2.Controllers
             }
         }
 
-        [HttpPost("/home/setMomentarySwitchToTrue")]
+        [HttpPost("home/setMomentarySwitchToTrue")]
         public async Task<IActionResult> SetMomentarySwitchToTrue()
         {
             try
@@ -124,7 +124,7 @@ namespace WebApplication2.Controllers
             }
         }
 
-        [HttpPost("/home/setMomentarySwitchToFalse")]
+        [HttpPost("home/setMomentarySwitchToFalse")]
         public async Task<IActionResult> SetMomentarySwitchToFalse()
         {
             try
@@ -148,12 +148,12 @@ namespace WebApplication2.Controllers
         {
             return View();
         }
-
+        
         public async Task<IActionResult> Bedroom() // Dodajemy async i Task<IActionResult>
         {
            return View();
         }
-
+        
         public IActionResult Bathroom()
         {
             return View();

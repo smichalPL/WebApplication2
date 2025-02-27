@@ -1,6 +1,233 @@
-﻿@{
+﻿@model WebApplication2.Models.BedroomViewModel
+
+@{
     ViewData["Title"] = "Bedroom";
 }
 <h1>@ViewData["Title"]</h1>
 
 <p>View room 1</p>
+<head>
+    <link rel="stylesheet" href="~/css/style.css" />
+</head>
+
+
+<h2>Wartości z PLC</h2>
+
+<p>lampSwitchLeft: <span id="lamp-switch-left-display">@Model.lampSwitchLeftHMI</span></p>
+<p>wallSocket: <span id="wall-socket-display">@Model.wallSocketHMI</span></p>
+<p>facadeBlindsUp: <span id="facade-blinds-up-display">@Model.facadeBlindsUpHMI</span></p>
+<p>facadeBlindsDown: <span id="facade-blinds-down-display">@Model.facadeBlindsDownHMI</span></p>
+<p>facadeBlindsStop: <span id="facade-blinds-stop-display">@Model.facadeBlindsStopHMI</span></p>
+<p>lampRelayCeiling: <span id="lamp-relay-ceiling-display">@Model.lampRelayCeiling</span></p>
+<p>windowOpenSensor: <span id="window-open-sensor-display">@Model.windowOpenSensor</span></p>
+
+
+<h2>Zapis danych do PLC</h2>
+
+<button id="toggle-bool-button" class="toggle-button-@Model.wallSocketHMI">Zmień wallSocket</button>
+
+<button id="lamp-switch-left-displayn">Lamp Button</button>
+
+@section Scripts {
+    <script>
+        async function refresh() {
+            const request = await fetch('/bedroom/json');
+            const data = await request.json();
+
+            console.log('Nasze dane', data);
+            document.getElementById('i-counter-display').textContent = data.iCounter;
+            document.getElementById('my-bool-variable-display').textContent = data.MyBoolVariable;
+
+            // Aktualizacja koloru przycisku MyBoolVariable
+            updateButtonColor(data.MyBoolVariable);
+        }
+
+        setInterval(refresh, 2000);
+
+        document.getElementById('toggle-bool-button').addEventListener('click', async () => {
+            try {
+                const response = await fetch('/bedroom/toggleBool', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({})
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                console.log('Dane po zmianie MyBoolVariable:', data);
+                document.getElementById('my-bool-variable-display').textContent = data.MyBoolVariable;
+
+                // Aktualizacja koloru przycisku po kliknięciu
+                updateButtonColor(data.MyBoolVariable);
+
+            } catch (error) {
+                console.error('Błąd podczas zmiany MyBoolVariable:', error);
+            }
+        });
+
+        document.getElementById('i-pressure-display').addEventListener('click', () => {
+            document.getElementById('numeric-keyboard').style.display = 'block';
+        });
+
+        const keyboardButtons = document.querySelectorAll('#numeric-keyboard button');
+        let inputValue = '';
+
+        keyboardButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const buttonValue = button.textContent;
+
+                if (buttonValue === 'Za') {
+                    const newValueInt = parseInt(inputValue);
+                    if (!isNaN(newValueInt)) {
+                        saveNewPressureValue(newValueInt);
+                    } else {
+                        alert("Nieprawidłowa wartość. Wprowadź liczbę całkowitą.");
+                    }
+                    inputValue = '';
+                    document.getElementById('numeric-keyboard').style.display = 'none';
+                } else if (buttonValue === 'Co') {
+                    inputValue = ''; // Czyszczenie inputa
+                    document.getElementById('numeric-keyboard').style.display = 'none';
+                } else if (buttonValue === "Usuń") {
+                    inputValue = inputValue.slice(0, -1); // Usuwamy ostatni znak
+                } else if (buttonValue === ".") {
+                    if (!inputValue.includes(".")) { // Dodajemy warunek, aby można było dodać tylko jeden przecinek
+                        inputValue += buttonValue;
+                    }
+                }
+                else {
+                    inputValue += buttonValue;
+                }
+            });
+        });
+
+        async function saveNewPressureValue(newValue) {
+            try {
+                const response = await fetch('/bedroom/updatePressure', { // Nowy endpoint w kontrolerze
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ iPressure: newValue }) // Wysyłamy nową wartość w JSON-ie
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json(); // Odbieramy zaktualizowane dane (opcjonalne)
+                console.log('Dane po zmianie iPressure:', data);
+
+                // Aktualizujemy wyświetlacz iPressure
+                document.getElementById('i-pressure-display').textContent = data.iPressure;
+
+            } catch (error) {
+                console.error('Błąd podczas zmiany iPressure:', error);
+            }
+        }
+
+
+
+
+        // Dodajemy obsługę zdarzeń dla nowego przycisku
+        let momentaryButton = document.getElementById('momentary-button');
+        let isMomentaryButtonPressed = false;
+        let momentaryButtonInterval;
+
+        momentaryButton.addEventListener('mousedown', () => {
+            isMomentaryButtonPressed = true;
+            setVariableTo1(); // Funkcja, którą zdefiniujemy poniżej
+
+            momentaryButtonInterval = setInterval(() => {
+                if (isMomentaryButtonPressed) {
+                    setVariableTo1();
+                }
+            }, 100); // Wysyłaj co 100ms (opcjonalne)
+        });
+
+        momentaryButton.addEventListener('mouseup', () => {
+            isMomentaryButtonPressed = false;
+            setVariableTo0(); // Funkcja, którą zdefiniujemy poniżej
+            clearInterval(momentaryButtonInterval);
+        });
+
+        // Obsługa dotyku (opcjonalne):
+        momentaryButton.addEventListener('touchstart', () => {
+            isMomentaryButtonPressed = true;
+            setVariableTo1();
+
+            momentaryButtonInterval = setInterval(() => {
+                if (isMomentaryButtonPressed) {
+                    setVariableTo1();
+                }
+            }, 100);
+        });
+
+        momentaryButton.addEventListener('touchend', () => {
+            isMomentaryButtonPressed = false;
+            setVariableTo0();
+            clearInterval(momentaryButtonInterval);
+        });
+
+        async function setVariableTo1() {
+            try {
+                const response = await fetch('/bedroom/SetMomentarySwitchToTrue', { // Zmieniono na /SetMomentarySwitchToTrue
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({})
+                });
+
+            } catch (error) {
+                console.error('Błąd podczas ustawiania zmiennej na 1:', error);
+            }
+        }
+
+        async function setVariableTo0() {
+            try {
+                const response = await fetch('/bedroom/SetMomentarySwitchToFalse', { // Zmieniono na /SetMomentarySwitchToFalse
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({})
+                });
+
+            } catch (error) {
+                console.error('Błąd podczas ustawiania zmiennej na 0:', error);
+            }
+        }
+
+        // Funkcja do aktualizacji koloru przycisku
+        function updateButtonColor(myBoolVariable) {
+            const button = document.getElementById('toggle-bool-button');
+            button.className = myBoolVariable ? 'toggle-button-true' : 'toggle-button-false';
+        }
+        // Momentary Button - Dodajemy obsługę zmiany koloru
+
+        momentaryButton.addEventListener('mousedown', () => {
+            momentaryButton.classList.add('pressed'); // Dodajemy klasę "pressed"
+        });
+
+        momentaryButton.addEventListener('mouseup', () => {
+            momentaryButton.classList.remove('pressed'); // Usuwamy klasę "pressed"
+        });
+
+        // Opcjonalnie: Dodajemy obsługę dotyku dla urządzeń mobilnych
+        momentaryButton.addEventListener('touchstart', () => {
+            momentaryButton.classList.add('pressed'); // Dodajemy klasę "pressed"
+        });
+
+        momentaryButton.addEventListener('touchend', () => {
+            momentaryButton.classList.remove('pressed'); // Usuwamy klasę "pressed"
+        });
+
+
+    </script>
+}

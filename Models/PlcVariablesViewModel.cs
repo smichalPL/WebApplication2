@@ -12,6 +12,6 @@ namespace WebApplication2.Models
         public bool MomentarySwitch { get; set; }
         public bool ToggleSwitch { get; set; }
 
-        public Dictionary<string, bool> ButtonStates { get; set; } = new Dictionary<string, bool>(); // Dodajemy słownik
+        //public Dictionary<string, bool> ButtonStates { get; set; } = new Dictionary<string, bool>(); // Dodajemy słownik
     }
 }

@@ -54,10 +54,10 @@ namespace WebApplication2.Controllers
             try // Dodajemy try-catch
             {
                 model.lampSwitchLeftHMI = await _plcService.ReadVariableAsync<bool>("P_Bedroom.bLampSwitchLeftHMI");
-                model.wallSocketHMI = await _plcService.ReadVariableAsync<bool>("P_Bedroom.WallSocketHMI");
-                model.facadeBlindsUpHMI = await _plcService.ReadVariableAsync<bool>("P_Bedroom.FacadeBlindsUpHMI");
-                model.facadeBlindsDownHMI = await _plcService.ReadVariableAsync<bool>("P_BedroomFacadeBlindsDownHMI");
-                model.facadeBlindsStopHMI = await _plcService.ReadVariableAsync<bool>("P_Bedroom.FacadeBlindsStopHMI");
+                model.wallSocketHMI = await _plcService.ReadVariableAsync<bool>("P_Bedroom.bWallSocketHMI");
+                model.facadeBlindsUpHMI = await _plcService.ReadVariableAsync<bool>("P_Bedroom.bFacadeBlindsUpHMI");
+                model.facadeBlindsDownHMI = await _plcService.ReadVariableAsync<bool>("P_Bedroom.bFacadeBlindsDownHMI");
+                model.facadeBlindsStopHMI = await _plcService.ReadVariableAsync<bool>("P_Bedroom.bFacadeBlindsStopHMI");
                 model.lampRelayCeiling = await _plcService.ReadVariableAsync<bool>("GVL_IO.Y_BedroomLampRelayCeiling");
                 model.windowOpenSensor = await _plcService.ReadVariableAsync<bool>("GVL_IO.X_BedroomWindowOpenSensor");
             }
@@ -69,7 +69,7 @@ namespace WebApplication2.Controllers
             return model;
         }
 
-        [HttpPost("/bedroom/toggleBool")]
+        [HttpPost("bedroom/toggleBool")]
         public async Task<IActionResult> ToggleBool()
         {
             try
@@ -90,7 +90,7 @@ namespace WebApplication2.Controllers
             }
         }
 
-        [HttpPost("/bedroom/SetMomentarySwitchToTrue")]
+        [HttpPost("bedroom/SetMomentarySwitchToTrue")]
         public async Task<IActionResult> SetMomentarySwitchToTrue()
         {
             try
@@ -105,7 +105,7 @@ namespace WebApplication2.Controllers
             }
         }
 
-        [HttpPost("/bedroom/SetMomentarySwitchToFalse")]
+        [HttpPost("bedroom/SetMomentarySwitchToFalse")]
         public async Task<IActionResult> SetMomentarySwitchToFalse()
         {
             try
@@ -119,32 +119,6 @@ namespace WebApplication2.Controllers
                 return StatusCode(500);
             }
         }
-
-        public class PressureData
-        {
-            public int iPressure { get; set; }
-        }
-
-        public IActionResult Privacy()
-        {
-            return View();
-        }
-
-        public async Task<IActionResult> Bedroom() // Dodajemy async i Task<IActionResult>
-        {
-            return View();
-        }
-
-        public IActionResult Bathroom()
-        {
-            return View();
-        }
-
-        public IActionResult Irrigation()
-        {
-            return View();
-        }
-
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
