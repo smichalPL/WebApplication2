@@ -149,20 +149,8 @@ namespace WebApplication2.Controllers
             return View();
         }
         
-        public async Task<IActionResult> Bedroom() // Dodajemy async i Task<IActionResult>
-        {
-           return View();
-        }
-        
-        public IActionResult Bathroom()
-        {
-            return View();
-        }
-
-        public IActionResult Irrigation()
-        {
-            return View();
-        }
+  
+      
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()

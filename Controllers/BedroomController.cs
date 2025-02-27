@@ -74,9 +74,9 @@ namespace WebApplication2.Controllers
         {
             try
             {
-                bool myBoolVariable = await _plcService.ReadVariableAsync<bool>("P_Bedroom.WallSocketHMI");
+                bool myBoolVariable = await _plcService.ReadVariableAsync<bool>("P_Bedroom.bWallSocketHMI");
                 myBoolVariable = !myBoolVariable;
-                await _plcService.WriteVariableAsync("P_Bedroom.WallSocketHMI", myBoolVariable);
+                await _plcService.WriteVariableAsync("P_Bedroom.bWallSocketHMI", myBoolVariable);
 
                 var model = await GetPlcVariables(); // Dodajemy await
                 model.wallSocketHMI = myBoolVariable;

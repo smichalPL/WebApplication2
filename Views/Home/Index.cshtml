@@ -61,6 +61,8 @@
             console.log('Nasze dane', data);
             document.getElementById('i-counter-display').textContent = data.iCounter;
             document.getElementById('my-toggle-switch-display').textContent = data.ToggleSwitch;
+            document.getElementById('i-temperature-display').textContent = data.iTemperature;
+            document.getElementById('i-pressure-display').textContent = data.iPressure;
 
             // Aktualizacja koloru przycisku ToggleSwitch
             updateButtonColor(data.ToggleSwitch);

@@ -24,7 +24,7 @@
 
 <h2>Zapis danych do PLC</h2>
 
-<button id="toggle-bool-button" class="toggle-button-@Model.wallSocketHMI">Zmień wallSocket</button>
+<button id="toggle-bool-button" class="toggle-button-@Model.wallSocketHMI">Wall Socket</button>
 
 <button id="lamp-switch-left-displayn">Lamp Button</button>
 
@@ -35,11 +35,11 @@
             const data = await request.json();
 
             console.log('Nasze dane', data);
-            document.getElementById('i-counter-display').textContent = data.iCounter;
-            document.getElementById('my-bool-variable-display').textContent = data.MyBoolVariable;
+            document.getElementById('lamp-switch-left-display').textContent = data.lampSwitchLeftHMI;
+            document.getElementById('wall-socket-display').textContent = data.wallSocketHMI;
 
             // Aktualizacja koloru przycisku MyBoolVariable
-            updateButtonColor(data.MyBoolVariable);
+            updateButtonColor(data.wallSocketHMI);
         }
 
         setInterval(refresh, 2000);
@@ -70,9 +70,9 @@
             }
         });
 
-        document.getElementById('i-pressure-display').addEventListener('click', () => {
-            document.getElementById('numeric-keyboard').style.display = 'block';
-        });
+//        document.getElementById('i-pressure-display').addEventListener('click', () => {
+  //          document.getElementById('numeric-keyboard').style.display = 'block';
+    //    });
 
         const keyboardButtons = document.querySelectorAll('#numeric-keyboard button');
         let inputValue = '';
@@ -135,7 +135,7 @@
 
 
         // Dodajemy obsługę zdarzeń dla nowego przycisku
-        let momentaryButton = document.getElementById('momentary-button');
+        let momentaryButton = document.getElementById('lamp-switch-left-displayn');
         let isMomentaryButtonPressed = false;
         let momentaryButtonInterval;
 
