@@ -11,7 +11,5 @@ namespace WebApplication2.Models
         public bool lampRelayCeiling { get; set; }
         public bool windowOpenSensor { get; set; }
         // ... inne zmienne dla sypialni
-       // public Dictionary<string, bool> ButtonStates { get; set; } = new Dictionary<string, bool>(); // Dodajemy słownik
-
     }
 }

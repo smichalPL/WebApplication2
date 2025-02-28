@@ -81,7 +81,12 @@
                 }
 
                 const data = await response.json();
-                document.getElementById(`${modelPropertyName}-display`).textContent = data[modelPropertyName];
+                let displayId = modelPropertyName.replace('HMI', '');
+                displayId = displayId.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase(); // Wstaw myślnik między małymi i wielkimi literami.
+                displayId = displayId + '-display';
+
+                console.log('Generowany identyfikator:', displayId);
+                document.getElementById(displayId).textContent = data[modelPropertyName];
 
                 // Aktualizacja koloru przycisku
                 updateButtonColor(data[modelPropertyName], buttonId);
