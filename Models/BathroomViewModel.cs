@@ -2,7 +2,7 @@
 {
     public class BathroomViewModel
     {
-        public bool lampSwitchLeftHMI { get; set; }
+        public bool lampSwitchHMI { get; set; }
         public bool wallSocketHMI { get; set; }
         public bool facadeBlindsUpHMI { get; set; }
         public bool facadeBlindsDownHMI { get; set; }

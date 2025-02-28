@@ -53,7 +53,7 @@ namespace WebApplication2.Controllers
             var model = new BathroomViewModel();
             try
             {
-                model.lampSwitchLeftHMI = await _plcService.ReadVariableAsync<bool>("P_Bathroom.bLampSwitchLeftHMI");
+                model.lampSwitchHMI = await _plcService.ReadVariableAsync<bool>("P_Bathroom.bLampSwitchHMI");
                 model.wallSocketHMI = await _plcService.ReadVariableAsync<bool>("P_Bathroom.bWallSocketHMI");
                 model.facadeBlindsUpHMI = await _plcService.ReadVariableAsync<bool>("P_Bathroom.bFacadeBlindsUpHMI");
                 model.facadeBlindsDownHMI = await _plcService.ReadVariableAsync<bool>("P_Bathroom.bFacadeBlindsDownHMI");
@@ -118,7 +118,7 @@ namespace WebApplication2.Controllers
         {
             try
             {
-                await _plcService.WriteVariableAsync("P_Bathroom.bLampSwitchLeftHMI", true);
+                await _plcService.WriteVariableAsync("P_Bathroom.bLampSwitchHMI", true);
                 return Json(new { Message = "MomentarySwitch ustawiona na true" });
             }
             catch (Exception ex)
@@ -133,7 +133,7 @@ namespace WebApplication2.Controllers
         {
             try
             {
-                await _plcService.WriteVariableAsync("P_Bathroom.bLampSwitchLeftHMI", false);
+                await _plcService.WriteVariableAsync("P_Bathroom.bLampSwitchHMI", false);
                 return Json(new { Message = "MomentarySwitch ustawiona na false" });
             }
             catch (Exception ex)

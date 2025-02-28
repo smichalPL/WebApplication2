@@ -12,7 +12,7 @@
 
 <h2>Wartości z PLC</h2>
 
-<p>lampSwitchLeft: <span id="lamp-switch-left-display">@Model.lampSwitchLeftHMI</span></p>
+<p>lampSwitch: <span id="lamp-switch-display">@Model.lampSwitchHMI</span></p>
 <p>wallSocket: <span id="wall-socket-display">@Model.wallSocketHMI</span></p>
 <p>facadeBlindsUp: <span id="facade-blinds-up-display">@Model.facadeBlindsUpHMI</span></p>
 <p>facadeBlindsDown: <span id="facade-blinds-down-display">@Model.facadeBlindsDownHMI</span></p>
@@ -35,7 +35,7 @@
             const data = await request.json();
 
             console.log('Nasze dane', data);
-            document.getElementById('lamp-switch-left-display').textContent = data.lampSwitchLeftHMI;
+            document.getElementById('lamp-switch-display').textContent = data.lampSwitchtHMI;
             document.getElementById('wall-socket-display').textContent = data.wallSocketHMI;
             document.getElementById('facade-blinds-up-display').textContent = data.facadeBlindsUpHMI;
             document.getElementById('facade-blinds-down-display').textContent = data.facadeBlindsDownHMI;
@@ -81,7 +81,12 @@
                 }
 
                 const data = await response.json();
-                document.getElementById(`${modelPropertyName}-display`).textContent = data[modelPropertyName];
+                let displayId = modelPropertyName.replace('HMI', '');
+                displayId = displayId.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase(); // Wstaw myślnik między małymi i wielkimi literami.
+                displayId = displayId + '-display';
+
+                console.log('Generowany identyfikator:', displayId);
+                document.getElementById(displayId).textContent = data[modelPropertyName];
 
                 // Aktualizacja koloru przycisku
                 updateButtonColor(data[modelPropertyName], buttonId);
