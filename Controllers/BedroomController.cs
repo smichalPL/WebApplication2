@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using PlcVariableReader;
+using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using WebApplication2.Models;
@@ -18,27 +19,26 @@ namespace WebApplication2.Controllers
             _plcService = plcService;
         }
 
-        public async Task<IActionResult> Index() // Dodajemy async
+        public async Task<IActionResult> Index()
         {
             var model = new BedroomViewModel();
             try
             {
-                model = await GetPlcVariables(); // Dodajemy await
+                model = await GetPlcVariables();
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Błąd odczytu z PLC w kontrolerze.");
-                //model.sTekst = "Błąd odczytu";
             }
             return View(model);
         }
 
         [Route("bedroom/json")]
-        public async Task<IActionResult> Json() // Dodajemy async
+        public async Task<IActionResult> Json()
         {
             try
             {
-                var model = await GetPlcVariables(); // Dodajemy await
+                var model = await GetPlcVariables();
                 return Json(model);
             }
             catch (Exception ex)
@@ -48,10 +48,10 @@ namespace WebApplication2.Controllers
             }
         }
 
-        private async Task<BedroomViewModel> GetPlcVariables() // Dodajemy async Task
+        private async Task<BedroomViewModel> GetPlcVariables()
         {
             var model = new BedroomViewModel();
-            try // Dodajemy try-catch
+            try
             {
                 model.lampSwitchLeftHMI = await _plcService.ReadVariableAsync<bool>("P_Bedroom.bLampSwitchLeftHMI");
                 model.wallSocketHMI = await _plcService.ReadVariableAsync<bool>("P_Bedroom.bWallSocketHMI");
@@ -64,7 +64,6 @@ namespace WebApplication2.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Błąd w GetPlcVariables: " + ex.Message);
-               // model.sTekst = "Błąd odczytu";
             }
             return model;
         }
@@ -72,20 +71,44 @@ namespace WebApplication2.Controllers
         [HttpPost("bedroom/toggleBool")]
         public async Task<IActionResult> ToggleBool()
         {
+            return await ToggleState("P_Bedroom.bWallSocketHMI", "wallSocketHMI");
+        }
+
+        [HttpPost("bedroom/toggleBlindsUp")]
+        public async Task<IActionResult> ToggleBlindsUp()
+        {
+            return await ToggleState("P_Bedroom.bFacadeBlindsUpHMI", "facadeBlindsUpHMI");
+        }
+
+        [HttpPost("bedroom/toggleBlindsDown")]
+        public async Task<IActionResult> ToggleBlindsDown()
+        {
+            return await ToggleState("P_Bedroom.bFacadeBlindsDownHMI", "facadeBlindsDownHMI");
+        }
+
+        [HttpPost("bedroom/toggleBlindsStop")]
+        public async Task<IActionResult> ToggleBlindsStop()
+        {
+            return await ToggleState("P_Bedroom.bFacadeBlindsStopHMI", "facadeBlindsStopHMI");
+        }
+
+        private async Task<IActionResult> ToggleState(string plcVariableName, string modelPropertyName)
+        {
             try
             {
-                bool myBoolVariable = await _plcService.ReadVariableAsync<bool>("P_Bedroom.bWallSocketHMI");
-                myBoolVariable = !myBoolVariable;
-                await _plcService.WriteVariableAsync("P_Bedroom.bWallSocketHMI", myBoolVariable);
+                bool toggleState = await _plcService.ReadVariableAsync<bool>(plcVariableName);
+                toggleState = !toggleState;
+                await _plcService.WriteVariableAsync(plcVariableName, toggleState);
 
-                var model = await GetPlcVariables(); // Dodajemy await
-                model.wallSocketHMI = myBoolVariable;
+                var model = await GetPlcVariables();
+
+                typeof(BedroomViewModel).GetProperty(modelPropertyName)?.SetValue(model, toggleState);
 
                 return Json(model);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Błąd podczas zmiany MyBoolVariable w kontrolerze.");
+                _logger.LogError(ex, $"Błąd podczas zmiany {plcVariableName} w kontrolerze.");
                 return StatusCode(500);
             }
         }
@@ -119,6 +142,7 @@ namespace WebApplication2.Controllers
                 return StatusCode(500);
             }
         }
+
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {

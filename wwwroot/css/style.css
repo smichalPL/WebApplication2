@@ -1,36 +1,36 @@
-    .toggle-button-true {
-        background-color: darkgray;
-        color: white;
-    }
+.toggle-button-true {
+    background-color: darkgray;
+    color: white;
+}
 
-    .toggle-button-false {
-        background-color: lightgray;
-        color: black;
-    }
+.toggle-button-false {
+    background-color: lightgray;
+    color: black;
+}
 
-    #i-pressure-display {
-        cursor: pointer;
-        text-decoration: underline;
-    }
+#i-pressure-display {
+    cursor: pointer;
+    text-decoration: underline;
+}
 
-    #numeric-keyboard {
-        position: absolute;
-        background-color: #eee;
-        border: 2px solid #ccc;
-        padding: 15px;
-        z-index: 1000;
-        box-shadow: 5px 5px 10px rgba(0,0,0,0.3);
-        border-radius: 10px;
-    }
+#numeric-keyboard {
+    position: absolute;
+    background-color: #eee;
+    border: 2px solid #ccc;
+    padding: 15px;
+    z-index: 1000;
+    box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.3);
+    border-radius: 10px;
+}
 
     #numeric-keyboard table {
-            border-collapse: collapse;
-            width: auto;
+        border-collapse: collapse;
+        width: auto;
     }
 
-    #numeric-keyboard table tr td button {
-            color: black !important; /* Dodajemy !important, aby upewnić się, że ten styl będzie miał najwyższy priorytet */
-            font-size: 1rem; /* Zmniejszamy rozmiar czcionki */
+        #numeric-keyboard table tr td button {
+            color: black !important;
+            font-size: 1rem;
             width: 50px;
             height: 50px;
             margin: 8px;
@@ -39,34 +39,46 @@
             cursor: pointer;
             font-size: 20px;
             border-radius: 5px;
-            box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
-            /* Dodajemy kontrastowy kolor czcionki - ciemny szary lub czarny */
-            color: darkgrey; /* Można też użyć #000 dla czarnego */
-    }
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+            color: darkgrey;
+        }
 
-    #zatwierdz, #cofnij {
-        width: 108px;
-        background-color: #4CAF50;
-        /* Zmieniamy kolor czcionki na biały, bo przycisk jest zielony */
-        color: white;
-    }
-
-    #cofnij {
-        background-color: #f44336;
-        /* Zmieniamy kolor czcionki na biały, bo przycisk jest czerwony */
-        color: white;
-    }
-
-#momentary-button { /* Domyślne style przycisku */
-    background-color: lightgray;
+#zatwierdz,
+#cofnij {
+    width: 108px;
+    background-color: #4CAF50;
     color: white;
+}
+
+#cofnij {
+    background-color: #f44336;
+    color: white;
+}
+
+#momentary-button {
+    background-color: lightgray;
+    color: black;
     padding: 10px 15px;
     border: none;
     border-radius: 5px;
     cursor: pointer;
 }
 
-    #momentary-button.pressed { /* Style po wciśnięciu */
+    #momentary-button.pressed {
         background-color: darkgray;
+        color: white;
     }
+
+#momentary-lamp-button {
+    background-color: lightgray;
+    color: black;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
 }
+
+    #momentary-lamp-button.pressed {
+        background-color: darkgray;
+        color: white;
+    }

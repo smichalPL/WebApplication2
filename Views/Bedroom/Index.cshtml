@@ -10,7 +10,6 @@
     <link rel="stylesheet" href="~/css/style.css" />
 </head>
 
-
 <h2>Wartości z PLC</h2>
 
 <p>lampSwitchLeft: <span id="lamp-switch-left-display">@Model.lampSwitchLeftHMI</span></p>
@@ -21,12 +20,13 @@
 <p>lampRelayCeiling: <span id="lamp-relay-ceiling-display">@Model.lampRelayCeiling</span></p>
 <p>windowOpenSensor: <span id="window-open-sensor-display">@Model.windowOpenSensor</span></p>
 
-
 <h2>Zapis danych do PLC</h2>
 
 <button id="toggle-bool-button" class="toggle-button-@Model.wallSocketHMI">Wall Socket</button>
-
-<button id="lamp-switch-left-displayn">Lamp Button</button>
+<button id="toggle-blinds-up-button" class="toggle-button-@Model.facadeBlindsUpHMI">Blinds Up</button>
+<button id="toggle-blinds-down-button" class="toggle-button-@Model.facadeBlindsDownHMI">Blinds Down</button>
+<button id="toggle-blinds-stop-button" class="toggle-button-@Model.facadeBlindsStopHMI">Blinds Stop</button>
+<button id="momentary-lamp-button">Lamp Button</button>
 
 @section Scripts {
     <script>
@@ -37,16 +37,38 @@
             console.log('Nasze dane', data);
             document.getElementById('lamp-switch-left-display').textContent = data.lampSwitchLeftHMI;
             document.getElementById('wall-socket-display').textContent = data.wallSocketHMI;
+            document.getElementById('facade-blinds-up-display').textContent = data.facadeBlindsUpHMI;
+            document.getElementById('facade-blinds-down-display').textContent = data.facadeBlindsDownHMI;
+            document.getElementById('facade-blinds-stop-display').textContent = data.facadeBlindsStopHMI;
 
-            // Aktualizacja koloru przycisku MyBoolVariable
-            updateButtonColor(data.wallSocketHMI);
+            // Aktualizacja koloru przycisków
+            updateButtonColor(data.wallSocketHMI, 'toggle-bool-button');
+            updateButtonColor(data.facadeBlindsUpHMI, 'toggle-blinds-up-button');
+            updateButtonColor(data.facadeBlindsDownHMI, 'toggle-blinds-down-button');
+            updateButtonColor(data.facadeBlindsStopHMI, 'toggle-blinds-stop-button');
         }
 
         setInterval(refresh, 2000);
 
         document.getElementById('toggle-bool-button').addEventListener('click', async () => {
+            await toggleState('/bedroom/toggleBool', 'wallSocketHMI', 'toggle-bool-button');
+        });
+
+        document.getElementById('toggle-blinds-up-button').addEventListener('click', async () => {
+            await toggleState('/bedroom/toggleBlindsUp', 'facadeBlindsUpHMI', 'toggle-blinds-up-button');
+        });
+
+        document.getElementById('toggle-blinds-down-button').addEventListener('click', async () => {
+            await toggleState('/bedroom/toggleBlindsDown', 'facadeBlindsDownHMI', 'toggle-blinds-down-button');
+        });
+
+        document.getElementById('toggle-blinds-stop-button').addEventListener('click', async () => {
+            await toggleState('/bedroom/toggleBlindsStop', 'facadeBlindsStopHMI', 'toggle-blinds-stop-button');
+        });
+
+        async function toggleState(url, modelPropertyName, buttonId) {
             try {
-                const response = await fetch('/bedroom/toggleBool', {
+                const response = await fetch(url, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -59,40 +81,43 @@
                 }
 
                 const data = await response.json();
-                console.log('Dane po zmianie MyBoolVariable:', data);
-                document.getElementById('my-bool-variable-display').textContent = data.MyBoolVariable;
+                document.getElementById(`${modelPropertyName}-display`).textContent = data[modelPropertyName];
 
-                // Aktualizacja koloru przycisku po kliknięciu
-                updateButtonColor(data.MyBoolVariable);
+                // Aktualizacja koloru przycisku
+                updateButtonColor(data[modelPropertyName], buttonId);
 
             } catch (error) {
-                console.error('Błąd podczas zmiany MyBoolVariable:', error);
+                console.error(`Błąd podczas zmiany ${modelPropertyName}:`, error);
             }
-        });
+        }
+
+        function updateButtonColor(toggleButtonState, buttonId) {
+            const button = document.getElementById(buttonId);
+            button.className = toggleButtonState ? 'toggle-button-true' : 'toggle-button-false';
+        }
 
         // Dodajemy obsługę zdarzeń dla nowego przycisku
-        let momentaryButton = document.getElementById('lamp-switch-left-displayn');
+        let momentaryButton = document.getElementById('momentary-lamp-button');
         let isMomentaryButtonPressed = false;
         let momentaryButtonInterval;
 
         momentaryButton.addEventListener('mousedown', () => {
             isMomentaryButtonPressed = true;
-            setVariableTo1(); // Funkcja, którą zdefiniujemy poniżej
+            setVariableTo1();
 
             momentaryButtonInterval = setInterval(() => {
                 if (isMomentaryButtonPressed) {
                     setVariableTo1();
                 }
-            }, 100); // Wysyłaj co 100ms (opcjonalne)
+            }, 100);
         });
 
         momentaryButton.addEventListener('mouseup', () => {
             isMomentaryButtonPressed = false;
-            setVariableTo0(); // Funkcja, którą zdefiniujemy poniżej
+            setVariableTo0();
             clearInterval(momentaryButtonInterval);
         });
 
-        // Obsługa dotyku (opcjonalne):
         momentaryButton.addEventListener('touchstart', () => {
             isMomentaryButtonPressed = true;
             setVariableTo1();
@@ -112,14 +137,13 @@
 
         async function setVariableTo1() {
             try {
-                const response = await fetch('/bedroom/SetMomentarySwitchToTrue', { // Zmieniono na /SetMomentarySwitchToTrue
+                await fetch('/bedroom/SetMomentarySwitchToTrue', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({})
                 });
-
             } catch (error) {
                 console.error('Błąd podczas ustawiania zmiennej na 1:', error);
             }
@@ -127,43 +151,32 @@
 
         async function setVariableTo0() {
             try {
-                const response = await fetch('/bedroom/SetMomentarySwitchToFalse', { // Zmieniono na /SetMomentarySwitchToFalse
+                await fetch('/bedroom/SetMomentarySwitchToFalse', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({})
                 });
-
             } catch (error) {
                 console.error('Błąd podczas ustawiania zmiennej na 0:', error);
             }
         }
 
-        // Funkcja do aktualizacji koloru przycisku
-        function updateButtonColor(myBoolVariable) {
-            const button = document.getElementById('toggle-bool-button');
-            button.className = myBoolVariable ? 'toggle-button-true' : 'toggle-button-false';
-        }
-        // Momentary Button - Dodajemy obsługę zmiany koloru
-
         momentaryButton.addEventListener('mousedown', () => {
-            momentaryButton.classList.add('pressed'); // Dodajemy klasę "pressed"
+            momentaryButton.classList.add('pressed');
         });
 
         momentaryButton.addEventListener('mouseup', () => {
-            momentaryButton.classList.remove('pressed'); // Usuwamy klasę "pressed"
+            momentaryButton.classList.remove('pressed');
         });
 
-        // Opcjonalnie: Dodajemy obsługę dotyku dla urządzeń mobilnych
         momentaryButton.addEventListener('touchstart', () => {
-            momentaryButton.classList.add('pressed'); // Dodajemy klasę "pressed"
+            momentaryButton.classList.add('pressed');
         });
 
         momentaryButton.addEventListener('touchend', () => {
-            momentaryButton.classList.remove('pressed'); // Usuwamy klasę "pressed"
+            momentaryButton.classList.remove('pressed');
         });
-
-
     </script>
 }
