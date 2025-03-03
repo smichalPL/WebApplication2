@@ -69,7 +69,10 @@
         color: white;
     }
 
-#momentary-lamp-button {
+#momentary-lamp-button,
+#momentary-lamp1-button,
+#momentary-lamp2-button,
+#momentary-lamp3-button {
     background-color: lightgray;
     color: black;
     padding: 10px 15px;
@@ -78,7 +81,10 @@
     cursor: pointer;
 }
 
-    #momentary-lamp-button.pressed {
+    #momentary-lamp-button.pressed,
+    #momentary-lamp1-button.pressed,
+    #momentary-lamp2-button.pressed,
+    #momentary-lamp3-button.pressed {
         background-color: darkgray;
         color: white;
     }
