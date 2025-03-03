@@ -82,6 +82,10 @@ namespace PlcVariableReader
             { "GVL_IO.Y_SalonLampRelayCeiling_1", typeof(bool) },
             { "GVL_IO.Y_SalonLampRelayCeiling_2", typeof(bool) },
 
+            { "P_Vestibule.bLampSwitchHMI", typeof(bool) },
+            { "GVL_IO.X_VestibuleWindowOpenSensor", typeof(bool) },
+            { "GVL_IO.Y_VestibuleLampRelayCeiling", typeof(bool) },
+
             { "MyGVL.MyBoolVariable", typeof(bool) },
             { "MyGVL.iCounter", typeof(Int32) },
             { "MyGVL.sTekst", typeof(string) },
