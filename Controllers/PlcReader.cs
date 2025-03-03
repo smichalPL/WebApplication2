@@ -50,6 +50,18 @@ namespace PlcVariableReader
             { "GVL_IO.X_LeonWindowOpenSensor", typeof(bool) },
             { "GVL_IO.Y_LeonLampRelayCeiling", typeof(bool) },
 
+            { "P_Kitchen.bLampSwitchHMI", typeof(bool) },
+            { "P_Kitchen.bWallSocket1HMI", typeof(bool) },
+            { "P_Kitchen.bWallSocket2HMI", typeof(bool) },
+            { "P_Kitchen.bFacadeBlindsUpLeftHMI", typeof(bool) },
+            { "P_Kitchen.bFacadeBlindsDownLeftHMI", typeof(bool) },
+            { "P_Kitchen.bFacadeBlindsStopLeftHMI", typeof(bool) },
+            { "P_Kitchen.bFacadeBlindsUpRightHMI", typeof(bool) },
+            { "P_Kitchen.bFacadeBlindsDownRightHMI", typeof(bool) },
+            { "P_Kitchen.bFacadeBlindsStopRightHMI", typeof(bool) },
+            { "GVL_IO.X_KitchenWindowOpenSensor", typeof(bool) },
+            { "GVL_IO.Y_KitchenLampRelayCeiling", typeof(bool) },
+
             { "MyGVL.MyBoolVariable", typeof(bool) },
             { "MyGVL.iCounter", typeof(Int32) },
             { "MyGVL.sTekst", typeof(string) },
