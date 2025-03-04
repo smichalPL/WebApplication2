@@ -94,6 +94,14 @@ namespace PlcVariableReader
             { "GVL_IO.X_PantryWindowOpenSensor", typeof(bool) },
             { "GVL_IO.Y_PantryLampRelayCeiling", typeof(bool) },
 
+            { "P_Outdoor.bLampSwitch1HMI", typeof(bool) },
+            { "P_Outdoor.bLampSwitch2HMI", typeof(bool) },
+            { "P_Outdoor.bWallSocketFixWindowsHMI", typeof(bool) },
+            { "P_Outdoor.bWallSocketHsHMI", typeof(bool) },
+            { "P_Outdoor.bWallSocketRoofHMI", typeof(bool) },
+            { "GVL_IO.Y_OutdoorLampHS", typeof(bool) },
+            { "GVL_IO.Y_OutdoorLampEntrance", typeof(bool) },
+
             { "MyGVL.MyBoolVariable", typeof(bool) },
             { "MyGVL.iCounter", typeof(Int32) },
             { "MyGVL.sTekst", typeof(string) },

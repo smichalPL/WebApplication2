@@ -1,0 +1,269 @@
+﻿@model WebApplication2.Models.OutdoorViewModel
+
+@{
+    ViewData["Title"] = "Outdoor";
+}
+<h1>@ViewData["Title"]</h1>
+
+<p>View room: Outdoor</p>
+<head>
+    <link rel="stylesheet" href="~/css/style.css" />
+</head>
+
+<h2>Wartości z PLC</h2>
+
+<p>lampSwitch1HMI: <span id="lamp-switch1-display">@Model.lampSwitch1HMI</span></p>
+<p>lampSwitch2HMI: <span id="lamp-switch2-display">@Model.lampSwitch2HMI</span></p>
+<p>wallSocket1HMI: <span id="wall-socket1-display">@Model.wallSocket1HMI</span></p>
+<p>wallSocket2HMI: <span id="wall-socket2-display">@Model.wallSocket2HMI</span></p>
+<p>wallSocket3HMI: <span id="wall-socket3-display">@Model.wallSocket3HMI</span></p>
+<p>lampRelayCeiling1: <span id="lamp-relay-ceiling1-display">@Model.lampRelayCeiling1</span></p>
+<p>lampRelayCeiling2: <span id="lamp-relay-ceiling2-display">@Model.lampRelayCeiling2</span></p>
+
+<h2>Zapis danych do PLC</h2>
+
+<button id="toggle-wall-socket1-button" class="toggle-button-@Model.wallSocket1HMI">Wall Socket 1</button>
+<button id="toggle-wall-socket2-button" class="toggle-button-@Model.wallSocket2HMI">Wall Socket 2</button>
+<button id="toggle-wall-socket3-button" class="toggle-button-@Model.wallSocket3HMI">Wall Socket 3</button>
+<button id="momentary-lamp1-button" class="momentary-lamp-button">Lamp 1 Button</button>
+<button id="momentary-lamp2-button" class="momentary-lamp-button">Lamp 2 Button</button>
+
+
+@section Scripts {
+    <script>
+        async function refresh() {
+            const request = await fetch('/outdoor/json');
+            const data = await request.json();
+
+            console.log('Nasze dane', data);
+            document.getElementById('lamp-switch1-display').textContent = data.lampSwitch1HMI;
+            document.getElementById('lamp-switch2-display').textContent = data.lampSwitch2HMI;
+            document.getElementById('wall-socket1-display').textContent = data.wallSocket1HMI;
+            document.getElementById('wall-socket2-display').textContent = data.wallSocket2HMI;
+            document.getElementById('wall-socket3-display').textContent = data.wallSocket3HMI;
+            document.getElementById('lamp-relay-ceiling1-display').textContent = data.lampRelayCeiling1;
+            document.getElementById('lamp-relay-ceiling2-display').textContent = data.lampRelayCeiling2;
+
+            updateButtonColor(data.wallSocket1HMI, 'toggle-wall-socket1-button');
+            updateButtonColor(data.wallSocket2HMI, 'toggle-wall-socket2-button');
+            updateButtonColor(data.wallSocket3HMI, 'toggle-wall-socket3-button');
+        }
+
+        setInterval(refresh, 2000);
+
+        document.getElementById('toggle-wall-socket1-button').addEventListener('click', async () => {
+            await toggleState('/outdoor/toggleWallSocket1', 'wallSocket1HMI', 'toggle-wall-socket1-button');
+        });
+
+        document.getElementById('toggle-wall-socket2-button').addEventListener('click', async () => {
+            await toggleState('/outdoor/toggleWallSocket2', 'wallSocket2HMI', 'toggle-wall-socket2-button');
+        });
+
+        document.getElementById('toggle-wall-socket3-button').addEventListener('click', async () => {
+            await toggleState('/outdoor/toggleWallSocket3', 'wallSocket3HMI', 'toggle-wall-socket3-button');
+        });
+
+
+        async function toggleState(url, modelPropertyName, buttonId) {
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({})
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                let displayId = modelPropertyName.replace('HMI', '');
+                displayId = displayId.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
+                displayId = displayId + '-display';
+
+                console.log('Generowany identyfikator:', displayId);
+                document.getElementById(displayId).textContent = data[modelPropertyName];
+
+                updateButtonColor(data[modelPropertyName], buttonId);
+
+            } catch (error) {
+                console.error(`Błąd podczas zmiany ${modelPropertyName}:`, error);
+            }
+        }
+
+
+            function updateButtonColor(toggleButtonState, buttonId) {
+                const button = document.getElementById(buttonId);
+                button.className = toggleButtonState ? 'toggle-button-true' : 'toggle-button-false';
+            }
+
+            let momentaryButton1 = document.getElementById('momentary-lamp1-button');
+            let isMomentaryButton1Pressed = false;
+            let momentaryButton1Interval;
+
+            momentaryButton1.addEventListener('mousedown', () => {
+                isMomentaryButton1Pressed = true;
+                setVariable1To1();
+
+                momentaryButton1Interval = setInterval(() => {
+                    if (isMomentaryButton1Pressed) {
+                        setVariable1To1();
+                    }
+                }, 100);
+            });
+
+            momentaryButton1.addEventListener('mouseup', () => {
+                isMomentaryButton1Pressed = false;
+                setVariable1To0();
+                clearInterval(momentaryButton1Interval);
+            });
+
+            momentaryButton1.addEventListener('touchstart', () => {
+                isMomentaryButton1Pressed = true;
+                setVariable1To1();
+
+                momentaryButton1Interval = setInterval(() => {
+                    if (isMomentaryButton1Pressed) {
+                        setVariable1To1();
+                    }
+                }, 100);
+            });
+
+            momentaryButton1.addEventListener('touchend', () => {
+                isMomentaryButton1Pressed = false;
+                setVariable1To0();
+                clearInterval(momentaryButton1Interval);
+            });
+
+            async function setVariable1To1() {
+                try {
+                await fetch('/outdoor/SetMomentarySwitch1ToTrue', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({})
+                    });
+                } catch (error) {
+                    console.error('Błąd podczas ustawiania zmiennej 1 na 1:', error);
+                }
+            }
+
+            async function setVariable1To0() {
+                try {
+                await fetch('/outdoor/SetMomentarySwitch1ToFalse', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({})
+                    });
+                } catch (error) {
+                    console.error('Błąd podczas ustawiania zmiennej 1 na 0:', error);
+                }
+            }
+
+            momentaryButton1.addEventListener('mousedown', () => {
+                momentaryButton1.classList.add('pressed');
+            });
+
+            momentaryButton1.addEventListener('mouseup', () => {
+                momentaryButton1.classList.remove('pressed');
+            });
+
+            momentaryButton1.addEventListener('touchstart', () => {
+                momentaryButton1.classList.add('pressed');
+            });
+
+            momentaryButton1.addEventListener('touchend', () => {
+                momentaryButton1.classList.remove('pressed');
+            });
+
+            // Momentary Button 2
+
+            let momentaryButton2 = document.getElementById('momentary-lamp2-button');
+            let isMomentaryButton2Pressed = false;
+            let momentaryButton2Interval;
+
+            momentaryButton2.addEventListener('mousedown', () => {
+                isMomentaryButton2Pressed = true;
+                setVariable2To1();
+
+                momentaryButton2Interval = setInterval(() => {
+                    if (isMomentaryButton2Pressed) {
+                        setVariable2To1();
+                    }
+                }, 100);
+            });
+
+            momentaryButton2.addEventListener('mouseup', () => {
+                isMomentaryButton2Pressed = false;
+                setVariable2To0();
+                clearInterval(momentaryButton2Interval);
+            });
+
+            momentaryButton2.addEventListener('touchstart', () => {
+                isMomentaryButton2Pressed = true;
+                setVariable2To1();
+
+                momentaryButton2Interval = setInterval(() => {
+                    if (isMomentaryButton2Pressed) {
+                        setVariable2To1();
+                    }
+                }, 100);
+            });
+
+            momentaryButton2.addEventListener('touchend', () => {
+                isMomentaryButton2Pressed = false;
+                setVariable2To0();
+                clearInterval(momentaryButton2Interval);
+            });
+
+            async function setVariable2To1() {
+                try {
+                await fetch('/outdoor/SetMomentarySwitch2ToTrue', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({})
+                    });
+                } catch (error) {
+                    console.error('Błąd podczas ustawiania zmiennej 2 na 1:', error);
+                }
+            }
+
+            async function setVariable2To0() {
+                try {
+                await fetch('/outdoor/SetMomentarySwitch2ToFalse', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({})
+                    });
+                } catch (error) {
+                    console.error('Błąd podczas ustawiania zmiennej 2 na 0:', error);
+                }
+            }
+
+            momentaryButton2.addEventListener('mousedown', () => {
+                momentaryButton2.classList.add('pressed');
+            });
+
+            momentaryButton2.addEventListener('mouseup', () => {
+                momentaryButton2.classList.remove('pressed');
+            });
+
+            momentaryButton2.addEventListener('touchstart', () => {
+                momentaryButton2.classList.add('pressed');
+            });
+
+            momentaryButton2.addEventListener('touchend', () => {
+                momentaryButton2.classList.remove('pressed');
+            });
+
+    </script>
+}
