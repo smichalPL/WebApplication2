@@ -55,4 +55,27 @@ public class PlcService
             _semaphore.Release();
         }
     }
+
+    public async Task<ST_WeeklyTimeSwitchInput[]> ReadWeeklyScheduleAsync(int section)
+    {
+        string variableName = $"P_IrrigationSystem.arrWeeklyTimeSwitchInputSection{section}";
+        _logger.LogInformation($"Próba odczytu harmonogramu: {variableName}");
+
+        await _semaphore.WaitAsync();
+        try
+        {
+            var schedule = _plcReader.ReadWeeklySchedule(section);
+            _logger.LogInformation($"Odczytano harmonogram {variableName}: {schedule.Length} wpisów.");
+            return schedule;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"Błąd odczytu harmonogramu {variableName}: {ex.Message}");
+            throw;
+        }
+        finally
+        {
+            _semaphore.Release();
+        }
+    }
 }

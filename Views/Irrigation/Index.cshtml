@@ -13,8 +13,18 @@
     <h3>Sekcja @sectionIndex</h3>
     <form id="section-form-@sectionIndex">
         @{
-            var section = Model.GetType().GetProperty($"Section{sectionIndex}").GetValue(Model) as WebApplication2.Models.ST_WeeklyTimeSwitchInput[];
+            ST_WeeklyTimeSwitchInput[] section = sectionIndex switch
+            {
+                1 => Model.Section1,
+                2 => Model.Section2,
+                3 => Model.Section3,
+                4 => Model.Section4,
+                5 => Model.Section5,
+                6 => Model.Section6,
+                _ => Array.Empty<ST_WeeklyTimeSwitchInput>()
+            };
         }
+
         @if (section != null)
         {
             @for (int i = 0; i < section.Length; i++)

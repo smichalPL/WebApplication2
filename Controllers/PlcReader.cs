@@ -235,6 +235,23 @@ namespace PlcVariableReader
             }
         }
 
+        public ST_WeeklyTimeSwitchInputArray ReadWeeklySchedule(string variableName)
+        {
+            try
+            {
+                uint handle = _adsClient.CreateVariableHandle(variableName);
+                var schedule = _adsClient.ReadAny<ST_WeeklyTimeSwitchInputArray>(handle);
+                _adsClient.DeleteVariableHandle(handle);
+                return schedule;
+            }
+            catch (Exception ex)
+            {
+                throw new PlcException($"Błąd odczytu '{variableName}': {ex.Message}", ex);
+            }
+        }
+
+
+
         public void Dispose()
         {
             Dispose(true);
