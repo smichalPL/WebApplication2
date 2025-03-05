@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using WebApplication2.Models;
+using System.Runtime.InteropServices;
 
 namespace PlcVariableReader
 {
@@ -204,11 +205,28 @@ namespace PlcVariableReader
         public ST_WeeklyTimeSwitchInput[] ReadWeeklySchedule(int section)
         {
             string variableName = $"P_IrrigationSystem.arrWeeklyTimeSwitchInputSection{section}";
+            int structSize = Marshal.SizeOf(typeof(ST_WeeklyTimeSwitchInput)); // Rozmiar jednej struktury
+            int arraySize = structSize * 5; // Rozmiar całej tablicy
+
             try
             {
                 uint handle = _adsClient.CreateVariableHandle(variableName);
-                var schedule = (ST_WeeklyTimeSwitchInput[])_adsClient.ReadAny(handle, typeof(ST_WeeklyTimeSwitchInput), new int[] { 5 });
+
+                // Pobieramy surowe bajty
+                byte[] rawData = (byte[])_adsClient.ReadAny(handle, typeof(byte[]), new int[] { arraySize });
+
                 _adsClient.DeleteVariableHandle(handle);
+
+                // Konwersja bajtów na tablicę struktur
+                ST_WeeklyTimeSwitchInput[] schedule = new ST_WeeklyTimeSwitchInput[5];
+                for (int i = 0; i < 5; i++)
+                {
+                    IntPtr ptr = Marshal.AllocHGlobal(structSize);
+                    Marshal.Copy(rawData, i * structSize, ptr, structSize);
+                    schedule[i] = Marshal.PtrToStructure<ST_WeeklyTimeSwitchInput>(ptr);
+                    Marshal.FreeHGlobal(ptr);
+                }
+
                 return schedule;
             }
             catch (Exception ex)
@@ -217,36 +235,36 @@ namespace PlcVariableReader
             }
         }
 
+
+
         public void WriteWeeklySchedule(int section, ST_WeeklyTimeSwitchInput[] schedule)
         {
             if (schedule.Length != 5)
-                throw new ArgumentException("Schedule must contain exactly 5 elements.");
+                throw new ArgumentException("Schedule must contain dokładnie 5 elementów.");
 
             string variableName = $"P_IrrigationSystem.arrWeeklyTimeSwitchInputSection{section}";
+            int structSize = Marshal.SizeOf(typeof(ST_WeeklyTimeSwitchInput));
+            int arraySize = structSize * 5;
+
+            byte[] rawData = new byte[arraySize];
+
             try
             {
+                for (int i = 0; i < 5; i++)
+                {
+                    IntPtr ptr = Marshal.AllocHGlobal(structSize);
+                    Marshal.StructureToPtr(schedule[i], ptr, true);
+                    Marshal.Copy(ptr, rawData, i * structSize, structSize);
+                    Marshal.FreeHGlobal(ptr);
+                }
+
                 uint handle = _adsClient.CreateVariableHandle(variableName);
-                _adsClient.WriteAny(handle, schedule);
+                _adsClient.WriteAny(handle, rawData);
                 _adsClient.DeleteVariableHandle(handle);
             }
             catch (Exception ex)
             {
                 throw new PlcException($"Błąd zapisu '{variableName}': {ex.Message}", ex);
-            }
-        }
-
-        public ST_WeeklyTimeSwitchInputArray ReadWeeklySchedule(string variableName)
-        {
-            try
-            {
-                uint handle = _adsClient.CreateVariableHandle(variableName);
-                var schedule = _adsClient.ReadAny<ST_WeeklyTimeSwitchInputArray>(handle);
-                _adsClient.DeleteVariableHandle(handle);
-                return schedule;
-            }
-            catch (Exception ex)
-            {
-                throw new PlcException($"Błąd odczytu '{variableName}': {ex.Message}", ex);
             }
         }
 
