@@ -219,7 +219,7 @@ namespace PlcVariableReader
 
                 // Konwersja bajtów na tablicę struktur
                 ST_WeeklyTimeSwitchInput[] schedule = new ST_WeeklyTimeSwitchInput[5];
-                for (int i = 0; i < 5; i++)
+                for (int i = 1; i < 5; i++)
                 {
                     IntPtr ptr = Marshal.AllocHGlobal(structSize);
                     Marshal.Copy(rawData, i * structSize, ptr, structSize);
@@ -250,7 +250,7 @@ namespace PlcVariableReader
 
             try
             {
-                for (int i = 0; i < 5; i++)
+                for (int i = 1; i < 5; i++)
                 {
                     IntPtr ptr = Marshal.AllocHGlobal(structSize);
                     Marshal.StructureToPtr(schedule[i], ptr, true);
