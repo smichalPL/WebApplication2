@@ -15,8 +15,12 @@
         {
             <tr>
                 <td>@i</td>
-                <td>@Model[i].bBoolTest1</td>
-                <td>@Model[i].bBoolTest2</td>
+                <td>
+                    <input type="checkbox" disabled @(Model[i].bBoolTest1 ? "checked" : "") />
+                </td>
+                <td>
+                    <input type="checkbox" disabled @(Model[i].bBoolTest2 ? "checked" : "") />
+                </td>
             </tr>
         }
     </tbody>
