@@ -112,13 +112,6 @@ namespace PlcVariableReader
             { "MyGVL.MomentarySwitch", typeof(bool) },
             { "MyGVL.ToggleSwitch", typeof(bool) },
 
-            { "P_IrrigationSystem.arrWeeklyTimeSwitchInputSection1", typeof(ST_WeeklyTimeSwitchInput[]) },
-            { "P_IrrigationSystem.arrWeeklyTimeSwitchInputSection2", typeof(ST_WeeklyTimeSwitchInput[]) },
-            { "P_IrrigationSystem.arrWeeklyTimeSwitchInputSection3", typeof(ST_WeeklyTimeSwitchInput[]) },
-            { "P_IrrigationSystem.arrWeeklyTimeSwitchInputSection4", typeof(ST_WeeklyTimeSwitchInput[]) },
-            { "P_IrrigationSystem.arrWeeklyTimeSwitchInputSection5", typeof(ST_WeeklyTimeSwitchInput[]) },
-            { "P_IrrigationSystem.arrWeeklyTimeSwitchInputSection6", typeof(ST_WeeklyTimeSwitchInput[]) },
-            { "P_IrrigationSystem.bValveSwitchHMI", typeof(bool[]) }
         };
 
         public PlcReader(IOptions<PlcConfiguration> plcConfiguration, ILogger<PlcReader> logger)
@@ -202,84 +195,7 @@ namespace PlcVariableReader
             }
         }
 
-        public ST_WeeklyTimeSwitchInput[] ReadWeeklySchedule(int section)
-        {
-            string variableName = $"P_IrrigationSystem.arrWeeklyTimeSwitchInputSection{section}";
-            int structSize = Marshal.SizeOf(typeof(ST_WeeklyTimeSwitchInput));
-            int arraySize = structSize * 5; // 5 elementów w tablicy
-
-            try
-            {
-                // Tworzymy uchwyt do zmiennej w PLC
-                uint handle = _adsClient.CreateVariableHandle(variableName);
-
-                // Odczytujemy surowe dane jako tablicę bajtów
-                byte[] rawData = (byte[])_adsClient.ReadAny(handle, typeof(byte[]), new int[] { arraySize });
-
-                // Zwolnienie uchwytu
-                _adsClient.DeleteVariableHandle(handle);
-
-                // Tworzymy tablicę na wyniki
-                ST_WeeklyTimeSwitchInput[] schedule = new ST_WeeklyTimeSwitchInput[5];
-
-                for (int i = 0; i < 5; i++)
-                {
-                    int plcIndex = i + 1; // Przesunięcie na indeksy PLC (1..5)
-                    IntPtr ptr = Marshal.AllocHGlobal(structSize);
-                    Marshal.Copy(rawData, plcIndex * structSize, ptr, structSize);
-                    schedule[i] = Marshal.PtrToStructure<ST_WeeklyTimeSwitchInput>(ptr);
-                    Marshal.FreeHGlobal(ptr);
-                }
-
-
-                return schedule;
-            }
-            catch (Exception ex)
-            {
-                throw new PlcException($"Błąd odczytu '{variableName}': {ex.Message}", ex);
-            }
-        }
-
-
-
-
-
-        public void WriteWeeklySchedule(int section, ST_WeeklyTimeSwitchInput[] schedule)
-        {
-            if (schedule.Length != 5)
-                throw new ArgumentException("Schedule must contain dokładnie 5 elementów.");
-
-            string variableName = $"P_IrrigationSystem.arrWeeklyTimeSwitchInputSection{section}";
-            int structSize = Marshal.SizeOf(typeof(ST_WeeklyTimeSwitchInput));
-            int arraySize = structSize * 5;
-
-            byte[] rawData = new byte[arraySize];
-
-            try
-            {
-                for (int i = 0; i < 5; i++)
-                {
-                    int plcIndex = i + 1; // Przesunięcie na indeksy PLC (1..5)
-                    IntPtr ptr = Marshal.AllocHGlobal(structSize);
-                    Marshal.Copy(rawData, plcIndex * structSize, ptr, structSize);
-                    schedule[i] = Marshal.PtrToStructure<ST_WeeklyTimeSwitchInput>(ptr);
-                    Marshal.FreeHGlobal(ptr);
-                }
-
-
-                uint handle = _adsClient.CreateVariableHandle(variableName);
-                _adsClient.WriteAny(handle, rawData);
-                _adsClient.DeleteVariableHandle(handle);
-            }
-            catch (Exception ex)
-            {
-                throw new PlcException($"Błąd zapisu '{variableName}': {ex.Message}", ex);
-            }
-        }
-
-
-
-
+ 
 
         public void Dispose()
         {
