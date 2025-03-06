@@ -10,18 +10,54 @@
             <th>bBoolTest2</th>
         </tr>
     </thead>
-    <tbody>
+    <tbody id="checkboxTableBody">
         @for (int i = 0; i < Model.Count; i++)
         {
             <tr>
                 <td>@i</td>
                 <td>
-                    <input type="checkbox" disabled @(Model[i].bBoolTest1 ? "checked" : "") />
+                    <input type="checkbox" class="update-checkbox" data-index="@i" data-field="bBoolTest1" @(Model[i].bBoolTest1 ? "checked" : "") />
                 </td>
                 <td>
-                    <input type="checkbox" disabled @(Model[i].bBoolTest2 ? "checked" : "") />
+                    <input type="checkbox" class="update-checkbox" data-index="@i" data-field="bBoolTest2" @(Model[i].bBoolTest2 ? "checked" : "") />
                 </td>
             </tr>
         }
     </tbody>
 </table>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // 1️⃣ Obsługa zmiany checkboxów (zapis do PLC)
+        document.querySelectorAll(".update-checkbox").forEach(function (checkbox) {
+            checkbox.addEventListener("change", function () {
+                let index = this.getAttribute("data-index");
+                let field = this.getAttribute("data-field");
+                let value = this.checked;
+
+                fetch("/Plc/UpdateTestArray", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ index: index, field: field, value: value })
+                }).then(response => {
+                    if (!response.ok) {
+                        alert("Błąd zapisu do PLC!");
+                    }
+                });
+            });
+        });
+
+        // 2️⃣ Automatyczna aktualizacja co 2 sekundy
+        setInterval(() => {
+            fetch("/Plc/GetTestArray")
+                .then(response => response.json())
+                .then(data => {
+                    data.forEach((item, index) => {
+                        document.querySelector(`input[data-index="${index}"][data-field="bBoolTest1"]`).checked = item.bBoolTest1;
+                        document.querySelector(`input[data-index="${index}"][data-field="bBoolTest2"]`).checked = item.bBoolTest2;
+                    });
+                })
+                .catch(error => console.error("Błąd pobierania danych z PLC:", error));
+        }, 2000);
+    });
+</script>
