@@ -35,7 +35,7 @@
                 let field = this.getAttribute("data-field");
                 let value = this.checked;
 
-                fetch("/Plc/UpdateTestArray", {
+                fetch("/Irrigation/UpdateTestArray", { // Zmienione
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ index: index, field: field, value: value })
@@ -49,7 +49,7 @@
 
         // 2️⃣ Automatyczna aktualizacja co 2 sekundy
         setInterval(() => {
-            fetch("/Plc/GetTestArray")
+            fetch("/Irrigation/GetTestArray") // Zmienione
                 .then(response => response.json())
                 .then(data => {
                     data.forEach((item, index) => {

@@ -112,6 +112,27 @@ namespace PlcVariableReader
             { "MyGVL.MomentarySwitch", typeof(bool) },
             { "MyGVL.ToggleSwitch", typeof(bool) },
 
+            { "P_IrrigationSystemTmp.stTestArray[0].bBoolTest1", typeof(bool) },
+            { "P_IrrigationSystemTmp.stTestArray[0].bBoolTest2", typeof(bool) },
+            { "P_IrrigationSystemTmp.stTestArray[1].bBoolTest1", typeof(bool) },
+            { "P_IrrigationSystemTmp.stTestArray[1].bBoolTest2", typeof(bool) },
+            { "P_IrrigationSystemTmp.stTestArray[2].bBoolTest1", typeof(bool) },
+            { "P_IrrigationSystemTmp.stTestArray[2].bBoolTest2", typeof(bool) },
+            { "P_IrrigationSystemTmp.stTestArray[3].bBoolTest1", typeof(bool) },
+            { "P_IrrigationSystemTmp.stTestArray[3].bBoolTest2", typeof(bool) },
+            { "P_IrrigationSystemTmp.stTestArray[4].bBoolTest1", typeof(bool) },
+            { "P_IrrigationSystemTmp.stTestArray[4].bBoolTest2", typeof(bool) },
+            { "P_IrrigationSystemTmp.stTestArray[5].bBoolTest1", typeof(bool) },
+            { "P_IrrigationSystemTmp.stTestArray[5].bBoolTest2", typeof(bool) },
+            { "P_IrrigationSystemTmp.stTestArray[6].bBoolTest1", typeof(bool) },
+            { "P_IrrigationSystemTmp.stTestArray[6].bBoolTest2", typeof(bool) },
+            { "P_IrrigationSystemTmp.stTestArray[7].bBoolTest1", typeof(bool) },
+            { "P_IrrigationSystemTmp.stTestArray[7].bBoolTest2", typeof(bool) },
+            { "P_IrrigationSystemTmp.stTestArray[8].bBoolTest1", typeof(bool) },
+            { "P_IrrigationSystemTmp.stTestArray[8].bBoolTest2", typeof(bool) },
+            { "P_IrrigationSystemTmp.stTestArray[9].bBoolTest1", typeof(bool) },
+            { "P_IrrigationSystemTmp.stTestArray[9].bBoolTest2", typeof(bool) },
+
         };
 
         public PlcReader(IOptions<PlcConfiguration> plcConfiguration, ILogger<PlcReader> logger)
@@ -128,6 +149,7 @@ namespace PlcVariableReader
 
             _adsClient = new AdsClient();
             _adsClient.Connect(_amsNetId, _port);
+
         }
 
         public T ReadVariable<T>(string variableName)
