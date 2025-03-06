@@ -1,4 +1,5 @@
 ﻿using PlcVariableReader;
+using WebApplication2.Models;
 using Microsoft.Extensions.Logging; // Dodajemy using dla ILogger
 
 public class PlcService
@@ -55,4 +56,26 @@ public class PlcService
             _semaphore.Release();
         }
     }
+
+    public async Task<List<ST_InnerStruct>> ReadTestArrayAsync()
+    {
+        _logger.LogInformation("Próba odczytu tablicy stTestArray.");
+        await _semaphore.WaitAsync();
+        try
+        {
+            var result = _plcReader.ReadTestArray();
+            _logger.LogInformation("Odczytano tablicę stTestArray.");
+            return result;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"Błąd odczytu tablicy stTestArray: {ex.Message}");
+            throw;
+        }
+        finally
+        {
+            _semaphore.Release();
+        }
+    }
+
 }

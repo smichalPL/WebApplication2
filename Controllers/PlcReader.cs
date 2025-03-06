@@ -195,7 +195,46 @@ namespace PlcVariableReader
             }
         }
 
- 
+        public List<ST_InnerStruct> ReadTestArray()
+        {
+            List<ST_InnerStruct> result = new List<ST_InnerStruct>();
+            int sizeOfStruct = 2; // Rozmiar ST_InnerStruct w bajtach (2 bool'e)
+
+            for (int i = 0; i < 10; i++)
+            {
+                try
+                {
+                    // Utworzenie uchwytu dla elementu tablicy w PLC
+                    uint handle = _adsClient.CreateVariableHandle($"P_IrrigationSystemTmp.stTestArray[{i}]");
+
+                    // Odczyt danych z PLC za pomocą uchwytu
+                    byte[] data = _adsClient.ReadAny(handle, typeof(byte[]), new int[] { sizeOfStruct }) as byte[];
+
+                    // Zwolnienie uchwytu po odczycie
+                    _adsClient.DeleteVariableHandle(handle);
+
+                    if (data != null && data.Length == sizeOfStruct)
+                    {
+                        ST_InnerStruct innerStruct = new ST_InnerStruct
+                        {
+                            bBoolTest1 = (data[0] != 0),
+                            bBoolTest2 = (data[1] != 0)
+                        };
+                        result.Add(innerStruct);
+                    }
+                    else
+                    {
+                        _logger.LogError($"Błąd odczytu stTestArray[{i}]. Otrzymano nieprawidłowe dane.");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, $"Błąd odczytu stTestArray[{i}]: {ex.Message}");
+                }
+            }
+            return result;
+        }
+
 
         public void Dispose()
         {

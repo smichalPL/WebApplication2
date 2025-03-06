@@ -1,8 +1,23 @@
-﻿
-@{
-    ViewData["Title"] = "Irrigation";
-}
+﻿@model List<WebApplication2.Models.ST_InnerStruct>
 
-<h1>@ViewData["Title"]</h1>
+<h2>Dane z stTestArray</h2>
 
-<h2>Ustawienia systemu nawadniania</h2>
+<table>
+    <thead>
+        <tr>
+            <th>Index</th>
+            <th>bBoolTest1</th>
+            <th>bBoolTest2</th>
+        </tr>
+    </thead>
+    <tbody>
+        @for (int i = 0; i < Model.Count; i++)
+        {
+            <tr>
+                <td>@i</td>
+                <td>@Model[i].bBoolTest1</td>
+                <td>@Model[i].bBoolTest2</td>
+            </tr>
+        }
+    </tbody>
+</table>
