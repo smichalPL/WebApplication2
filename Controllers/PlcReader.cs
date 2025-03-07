@@ -113,46 +113,6 @@ namespace PlcVariableReader
             { "MyGVL.MomentarySwitch", typeof(bool) },
             { "MyGVL.ToggleSwitch", typeof(bool) },
 
-            { "P_IrrigationSystemTmp.stTestArray[0].bBoolTest1", typeof(bool) },
-            { "P_IrrigationSystemTmp.stTestArray[0].bBoolTest2", typeof(bool) },
-            { "P_IrrigationSystemTmp.stTestArray[0].Czas", typeof(UInt32) },
-
-            { "P_IrrigationSystemTmp.stTestArray[1].bBoolTest1", typeof(bool) },
-            { "P_IrrigationSystemTmp.stTestArray[1].bBoolTest2", typeof(bool) },
-            { "P_IrrigationSystemTmp.stTestArray[1].Czas", typeof(UInt32) },
-
-            { "P_IrrigationSystemTmp.stTestArray[2].bBoolTest1", typeof(bool) },
-            { "P_IrrigationSystemTmp.stTestArray[2].bBoolTest2", typeof(bool) },
-            { "P_IrrigationSystemTmp.stTestArray[2].Czas", typeof(UInt32) },
-
-            { "P_IrrigationSystemTmp.stTestArray[3].bBoolTest1", typeof(bool) },
-            { "P_IrrigationSystemTmp.stTestArray[3].bBoolTest2", typeof(bool) },
-            { "P_IrrigationSystemTmp.stTestArray[3].Czas", typeof(UInt32) },
-
-            { "P_IrrigationSystemTmp.stTestArray[4].bBoolTest1", typeof(bool) },
-            { "P_IrrigationSystemTmp.stTestArray[4].bBoolTest2", typeof(bool) },
-            { "P_IrrigationSystemTmp.stTestArray[4].Czas", typeof(UInt32) },
-
-            { "P_IrrigationSystemTmp.stTestArray[5].bBoolTest1", typeof(bool) },
-            { "P_IrrigationSystemTmp.stTestArray[5].bBoolTest2", typeof(bool) },
-            { "P_IrrigationSystemTmp.stTestArray[5].Czas", typeof(UInt32) },
-
-            { "P_IrrigationSystemTmp.stTestArray[6].bBoolTest1", typeof(bool) },
-            { "P_IrrigationSystemTmp.stTestArray[6].bBoolTest2", typeof(bool) },
-            { "P_IrrigationSystemTmp.stTestArray[6].Czas", typeof(UInt32) },
-
-            { "P_IrrigationSystemTmp.stTestArray[7].bBoolTest1", typeof(bool) },
-            { "P_IrrigationSystemTmp.stTestArray[7].bBoolTest2", typeof(bool) },
-            { "P_IrrigationSystemTmp.stTestArray[7].Czas", typeof(UInt32) },
-
-            { "P_IrrigationSystemTmp.stTestArray[8].bBoolTest1", typeof(bool) },
-            { "P_IrrigationSystemTmp.stTestArray[8].bBoolTest2", typeof(bool) },
-            { "P_IrrigationSystemTmp.stTestArray[8].Czas", typeof(UInt32) },
-
-            { "P_IrrigationSystemTmp.stTestArray[9].bBoolTest1", typeof(bool) },
-            { "P_IrrigationSystemTmp.stTestArray[9].bBoolTest2", typeof(bool) },
-            { "P_IrrigationSystemTmp.stTestArray[9].Czas", typeof(UInt32) },
-
         };
 
         public PlcReader(IOptions<PlcConfiguration> plcConfiguration, ILogger<PlcReader> logger)
@@ -237,62 +197,54 @@ namespace PlcVariableReader
             }
         }
 
-        public List<ST_InnerStruct> ReadTestArray()
-        {
-            List<ST_InnerStruct> result = new List<ST_InnerStruct>();
-            int sizeOfStruct = 8; // Poprawiony rozmiar struktury ST_InnerStruct
 
-            for (int i = 0; i < 10; i++)
+        public List<ST_WeeklyTimeSwitchInput> ReadWeeklyTimeSwitchArray(string arrayVariableName, int arrayLength = 2)
+        {
+            List<ST_WeeklyTimeSwitchInput> result = new List<ST_WeeklyTimeSwitchInput>();
+            int sizeOfStruct = 16; // 8 bajtów na 8 BOOL-ów + 4 + 4 bajty na TOD-y
+
+            for (int i = 0; i < arrayLength; i++)
             {
                 try
                 {
-                    uint handle = _adsClient.CreateVariableHandle($"P_IrrigationSystemTmp.stTestArray[{i}]");
+                    string fullVariableName = $"{arrayVariableName}[{i}]";
+                    var handle = _adsClient.CreateVariableHandle(fullVariableName);
                     byte[] data = _adsClient.ReadAny(handle, typeof(byte[]), new int[] { sizeOfStruct }) as byte[];
                     _adsClient.DeleteVariableHandle(handle);
 
                     if (data != null && data.Length == sizeOfStruct)
                     {
-                        _logger.LogInformation($"Surowe dane dla indeksu {i}: {BitConverter.ToString(data)}");
+                        _logger.LogInformation($"Surowe dane dla {fullVariableName}: {BitConverter.ToString(data)}");
 
-                        // Odczyt wartości BOOL
-                        bool boolTest1 = data[0] != 0;
-                        bool boolTest2 = data[1] != 0;
-
-                        // Odczyt milisekund (początek od indeksu 4)
-                        uint milliseconds = BitConverter.ToUInt32(data, 4);
-
-                        if (milliseconds == 0)
+                        ST_WeeklyTimeSwitchInput input = new ST_WeeklyTimeSwitchInput
                         {
-                            _logger.LogWarning($"Milliseconds dla indeksu {i} to zero. Ustawiam domyślny czas.");
-                            milliseconds = 1000; // Ustawienie wartości domyślnej
-                        }
+                            bEnable = data[0] != 0,
+                            bSunday = data[1] != 0,
+                            bMonday = data[2] != 0,
+                            bTuesday = data[3] != 0,
+                            bWednesday = data[4] != 0,
+                            bThursday = data[5] != 0,
+                            bFriday = data[6] != 0,
+                            bSaturday = data[7] != 0,
+                            tTimeOnRaw = BitConverter.ToUInt32(data, 8),
+                            tTimeOffRaw = BitConverter.ToUInt32(data, 12)
+                        };
 
-                        TimeSpan timeSpan = TimeSpan.FromMilliseconds(milliseconds);
-                        _logger.LogInformation($"Czas dla indeksu {i}: {timeSpan.ToString(@"hh\:mm\:ss\.fff")}");
-
-                        ST_InnerStruct innerStruct = new ST_InnerStruct
-                        {
-                            bBoolTest1 = boolTest1,
-                            bBoolTest2 = boolTest2,
-                            Czas = (uint)timeSpan.TotalMilliseconds
-                    };
-
-                        result.Add(innerStruct);
+                        result.Add(input);
                     }
                     else
                     {
-                        _logger.LogError($"Niepoprawna długość danych dla stTestArray[{i}]. Dane: {BitConverter.ToString(data)}");
+                        _logger.LogError($"Niepoprawna długość danych dla {fullVariableName}. Dane: {BitConverter.ToString(data)}");
                     }
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, $"Błąd odczytu stTestArray[{i}]: {ex.Message}");
+                    _logger.LogError(ex, $"Błąd odczytu {arrayVariableName}[{i}]: {ex.Message}");
                 }
             }
 
             return result;
         }
-
 
 
 

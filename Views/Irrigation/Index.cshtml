@@ -1,163 +1,65 @@
-﻿@model List<WebApplication2.Models.IrrigationViewModel>
+﻿@model WebApplication2.Models.WeeklyTimeSwitchCompositeViewModel
 
-<h2>Dane z stTestArray</h2>
+@{
+    Layout = null;
+}
 
-<table>
-    <thead>
-        <tr>
-            <th>Index</th>
-            <th>bBoolTest1</th>
-            <th>bBoolTest2</th>
-            <th>Czas</th>
-        </tr>
-    </thead>
-    <tbody id="checkboxTableBody">
-        @for (int i = 0; i < Model.Count; i++)
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Harmonogram Nawadniania</title>
+    <link rel="stylesheet" href="~/css/style.css" />
+</head>
+<body>
+    <div class="container">
+        <h2>Harmonogram Nawadniania</h2>
+
+        @{
+            var sections = new[] { Model.Section0, Model.Section1, Model.Section2, Model.Section3, Model.Section4, Model.Section5, Model.Section6 };
+        }
+        @foreach (var section in sections)
         {
-            <tr>
-                <td>@i</td>
-                <td>
-                    <input type="checkbox" class="update-checkbox" data-index="@i" data-field="bBoolTest1" @(Model[i].bBoolTest1 ? "checked" : "") />
-                </td>
-                <td>
-                    <input type="checkbox" class="update-checkbox" data-index="@i" data-field="bBoolTest2" @(Model[i].bBoolTest2 ? "checked" : "") />
-                </td>
-                <td onclick="openTimeModal(this)" data-index="@i" data-type="hours">
-                    @Model[i].Czas.ToString(@"hh\:mm").Split(':')[0]
-                </td>
-                <td onclick="openTimeModal(this)" data-index="@i" data-type="minutes">
-                    @Model[i].Czas.ToString(@"hh\:mm").Split(':')[1]
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+            <div class="section">
+                <h3>Section @Array.IndexOf(sections, section)</h3>
 
-<div class="modal" id="hoursModal">
-    <input type="number" id="hoursInput" placeholder="Godziny">
-</div>
-
-<div class="modal" id="minutesModal">
-    <input type="number" id="minutesInput" placeholder="Minuty">
-</div>
-
-
-
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        // 1️⃣ Obsługa zmiany checkboxów (zapis do PLC)
-        document.querySelectorAll(".update-checkbox").forEach(function (checkbox) {
-            checkbox.addEventListener("change", function () {
-                let index = this.getAttribute("data-index");
-                let field = this.getAttribute("data-field");
-                let value = this.checked;
-
-                fetch("/Irrigation/UpdateTestArray", { // Zmienione
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ index: index, field: field, value: value })
-                }).then(response => {
-                    if (!response.ok) {
-                        alert("Błąd zapisu do PLC!");
-                    }
-                });
-            });
-        });
-
-        // 2️⃣ Automatyczna aktualizacja co 2 sekundy
-        setInterval(() => {
-            console.log("Rozpoczęto pobieranie danych z PLC...");
-
-            fetch("/Irrigation/GetTestArray")
-                .then(response => {
-                    console.log("Otrzymano odpowiedź z serwera:", response);
-                    if (!response.ok) {
-                        throw new Error(`Błąd HTTP! status: ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    console.log("Otrzymano dane z PLC:", data);
-
-                    if (!Array.isArray(data)) {
-                        console.error("Otrzymane dane nie są tablicą:", data);
-                        return; // Przerwij dalsze przetwarzanie
-                    }
-
-                    data.forEach((item, index) => {
-                        console.log(`Przetwarzanie elementu o indeksie ${index}:`, item);
-
-                        const bBoolTest1Input = document.querySelector(`input[data-index="${index}"][data-field="bBoolTest1"]`);
-                        const bBoolTest2Input = document.querySelector(`input[data-index="${index}"][data-field="bBoolTest2"]`);
-
-                        if (bBoolTest1Input) {
-                            console.log(`Ustawianie bBoolTest1 dla indeksu ${index} na:`, item.bBoolTest1);
-                            bBoolTest1Input.checked = item.bBoolTest1;
-                        } else {
-                            console.warn(`Nie znaleziono elementu bBoolTest1 dla indeksu ${index}`);
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Enabled</th>
+                            <th>Sunday</th>
+                            <th>Monday</th>
+                            <th>Tuesday</th>
+                            <th>Wednesday</th>
+                            <th>Thursday</th>
+                            <th>Friday</th>
+                            <th>Saturday</th>
+                            <th>Time On</th>
+                            <th>Time Off</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in section)
+                        {
+                            <tr>
+                                <td>@item.bEnable</td>
+                                <td>@item.bSunday</td>
+                                <td>@item.bMonday</td>
+                                <td>@item.bTuesday</td>
+                                <td>@item.bWednesday</td>
+                                <td>@item.bThursday</td>
+                                <td>@item.bFriday</td>
+                                <td>@item.bSaturday</td>
+                                <td>@item.tTimeOn.ToString("hh\\:mm")</td>
+                                <td>@item.tTimeOff.ToString("hh\\:mm")</td>
+                            </tr>
                         }
-
-                        if (bBoolTest2Input) {
-                            console.log(`Ustawianie bBoolTest2 dla indeksu ${index} na:`, item.bBoolTest2);
-                            bBoolTest2Input.checked = item.bBoolTest2;
-                        } else {
-                            console.warn(`Nie znaleziono elementu bBoolTest2 dla indeksu ${index}`);
-                        }
-                    });
-                    console.log("Aktualizacja checkboxów zakończona.");
-                })
-                .catch(error => {
-                    console.error("Błąd pobierania danych z PLC:", error);
-                });
-
-        }, 4000);
-    });
-
-    let currentIndex;
-    let currentType;
-
-    function openTimeModal(element) {
-        currentIndex = element.getAttribute("data-index");
-        currentType = element.getAttribute("data-type");
-        if (currentType === "hours") {
-            document.getElementById("hoursModal").style.display = "block";
-            document.getElementById("hoursInput").value = parseInt(element.textContent);
-        } else {
-            document.getElementById("minutesModal").style.display = "block";
-            document.getElementById("minutesInput").value = parseInt(element.textContent);
+                    </tbody>
+                </table>
+            </div>
         }
-    }
+    </div>
 
-    function updateTime() {
-        let hours = document.getElementById("hoursInput").value;
-        let minutes = document.getElementById("minutesInput").value;
-
-        if (currentType === "minutes") {
-            hours = document.querySelectorAll(`[data-index='${currentIndex}'][data-type='hours']`)[0].textContent;
-        }
-        if (currentType === "hours") {
-            minutes = document.querySelectorAll(`[data-index='${currentIndex}'][data-type='minutes']`)[0].textContent;
-        }
-
-        const milliseconds = (parseInt(hours) * 3600 + parseInt(minutes) * 60) * 1000;
-        fetch("/Irrigation/UpdateTime", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ index: currentIndex, time: milliseconds })
-        });
-        document.getElementById("hoursModal").style.display = "none";
-        document.getElementById("minutesModal").style.display = "none";
-    }
-
-    document.getElementById("hoursInput").addEventListener("change", updateTime);
-    document.getElementById("minutesInput").addEventListener("change", updateTime);
-
-
-    // Serializacja modelu do JSON
-    var modelJson = @Html.Raw(Json.Serialize(Model));
-
-    // Logowanie JSON w konsoli przeglądarki
-    console.log("Model z kontrolera:", modelJson);
-</script>
+</body>
+</html>

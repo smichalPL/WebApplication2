@@ -58,31 +58,19 @@ public class PlcService
         }
     }
 
-    public async Task<List<ST_InnerStruct>> ReadTestArrayAsync()
+     public async Task<List<ST_WeeklyTimeSwitchInput>> ReadWeeklyTimeSwitchArrayAsync(string arrayVariableName, int arrayLength = 2)
     {
-        _logger.LogInformation("Próba odczytu tablicy stTestArray.");
+        _logger.LogInformation($"Próba odczytu tablicy: {arrayVariableName}");
         await _semaphore.WaitAsync();
         try
         {
-            var result = _plcReader.ReadTestArray();
-
-            // Dodajemy logi, aby sprawdzić wartości boolowskie
-            if (result != null)
-            {
-                foreach (var item in result)
-                {
-                    _logger.LogInformation($"Odczytano element ReadTestArrayAsync: bBoolTest1={item.bBoolTest1}, bBoolTest2={item.bBoolTest2}, Czas={item.Czas}");
-                }
-            }
-
-            _logger.LogInformation("Odczytano tablicę stTestArray.");
-            _logger.LogInformation($"Odczytane dane ReadTestArrayAsync: {JsonSerializer.Serialize(result)}"); // Dodajemy logowanie serializowanych danych
-
+            var result = _plcReader.ReadWeeklyTimeSwitchArray(arrayVariableName, arrayLength);
+            _logger.LogInformation($"Odczytano tablicę {arrayVariableName}: {JsonSerializer.Serialize(result)}");
             return result;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Błąd odczytu tablicy stTestArray: {ex.Message}");
+            _logger.LogError(ex, $"Błąd odczytu tablicy {arrayVariableName}: {ex.Message}");
             throw;
         }
         finally
@@ -90,5 +78,6 @@ public class PlcService
             _semaphore.Release();
         }
     }
+
 
 }

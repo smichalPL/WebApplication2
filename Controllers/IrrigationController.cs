@@ -24,22 +24,122 @@ namespace WebApplication2.Controllers
         // Akcja główna – odczytuje tablicę z PLC i mapuje ją na model widoku
         public async Task<IActionResult> Index()
         {
-            _logger.LogInformation("Rozpoczęto akcję Index.");
+            _logger.LogInformation("Rozpoczęto akcję Index dla WeeklyTimeSwitchInput.");
 
             try
             {
-                List<ST_InnerStruct> plcData = await _plcService.ReadTestArrayAsync();
-                _logger.LogInformation($"Index: Odczytano dane z PLC: {JsonSerializer.Serialize(plcData)}");
+                // Odczytujemy dane dla poszczególnych sekcji; zakładamy, że każda tablica ma 2 elementy (ARRAY[0..1])
+                var section0 = await _plcService.ReadWeeklyTimeSwitchArrayAsync("P_IrrigationSystem.arrWeeklyTimeSwitchInputSection0", 2);
+                var section1 = await _plcService.ReadWeeklyTimeSwitchArrayAsync("P_IrrigationSystem.arrWeeklyTimeSwitchInputSection1", 2);
+                var section2 = await _plcService.ReadWeeklyTimeSwitchArrayAsync("P_IrrigationSystem.arrWeeklyTimeSwitchInputSection2", 2);
+                var section3 = await _plcService.ReadWeeklyTimeSwitchArrayAsync("P_IrrigationSystem.arrWeeklyTimeSwitchInputSection3", 2);
+                var section4 = await _plcService.ReadWeeklyTimeSwitchArrayAsync("P_IrrigationSystem.arrWeeklyTimeSwitchInputSection4", 2);
+                var section5 = await _plcService.ReadWeeklyTimeSwitchArrayAsync("P_IrrigationSystem.arrWeeklyTimeSwitchInputSection5", 2);
+                var section6 = await _plcService.ReadWeeklyTimeSwitchArrayAsync("P_IrrigationSystem.arrWeeklyTimeSwitchInputSection6", 2);
 
-                var viewModel = plcData.Select((item, index) => new IrrigationViewModel
+                var viewModel = new WeeklyTimeSwitchCompositeViewModel
                 {
-                    Index = index,
-                    bBoolTest1 = item.bBoolTest1,
-                    bBoolTest2 = item.bBoolTest2,
-                    CzasRaw = item.Czas
-                }).ToList();
+                    Section0 = section0.Select((item, index) => new WeeklyTimeSwitchInputViewModel
+                    {
+                        Index = index,
+                        bEnable = item.bEnable,
+                        bSunday = item.bSunday,
+                        bMonday = item.bMonday,
+                        bTuesday = item.bTuesday,
+                        bWednesday = item.bWednesday,
+                        bThursday = item.bThursday,
+                        bFriday = item.bFriday,
+                        bSaturday = item.bSaturday,
+                        tTimeOn = item.tTimeOn,
+                        tTimeOff = item.tTimeOff
+                    }).ToList(),
+                    Section1 = section1.Select((item, index) => new WeeklyTimeSwitchInputViewModel
+                    {
+                        Index = index,
+                        bEnable = item.bEnable,
+                        bSunday = item.bSunday,
+                        bMonday = item.bMonday,
+                        bTuesday = item.bTuesday,
+                        bWednesday = item.bWednesday,
+                        bThursday = item.bThursday,
+                        bFriday = item.bFriday,
+                        bSaturday = item.bSaturday,
+                        tTimeOn = item.tTimeOn,
+                        tTimeOff = item.tTimeOff
+                    }).ToList(),
+                    Section2 = section2.Select((item, index) => new WeeklyTimeSwitchInputViewModel
+                    {
+                        Index = index,
+                        bEnable = item.bEnable,
+                        bSunday = item.bSunday,
+                        bMonday = item.bMonday,
+                        bTuesday = item.bTuesday,
+                        bWednesday = item.bWednesday,
+                        bThursday = item.bThursday,
+                        bFriday = item.bFriday,
+                        bSaturday = item.bSaturday,
+                        tTimeOn = item.tTimeOn,
+                        tTimeOff = item.tTimeOff
+                    }).ToList(),
+                    Section3 = section3.Select((item, index) => new WeeklyTimeSwitchInputViewModel
+                    {
+                        Index = index,
+                        bEnable = item.bEnable,
+                        bSunday = item.bSunday,
+                        bMonday = item.bMonday,
+                        bTuesday = item.bTuesday,
+                        bWednesday = item.bWednesday,
+                        bThursday = item.bThursday,
+                        bFriday = item.bFriday,
+                        bSaturday = item.bSaturday,
+                        tTimeOn = item.tTimeOn,
+                        tTimeOff = item.tTimeOff
+                    }).ToList(),
+                    Section4 = section4.Select((item, index) => new WeeklyTimeSwitchInputViewModel
+                    {
+                        Index = index,
+                        bEnable = item.bEnable,
+                        bSunday = item.bSunday,
+                        bMonday = item.bMonday,
+                        bTuesday = item.bTuesday,
+                        bWednesday = item.bWednesday,
+                        bThursday = item.bThursday,
+                        bFriday = item.bFriday,
+                        bSaturday = item.bSaturday,
+                        tTimeOn = item.tTimeOn,
+                        tTimeOff = item.tTimeOff
+                    }).ToList(),
+                    Section5 = section5.Select((item, index) => new WeeklyTimeSwitchInputViewModel
+                    {
+                        Index = index,
+                        bEnable = item.bEnable,
+                        bSunday = item.bSunday,
+                        bMonday = item.bMonday,
+                        bTuesday = item.bTuesday,
+                        bWednesday = item.bWednesday,
+                        bThursday = item.bThursday,
+                        bFriday = item.bFriday,
+                        bSaturday = item.bSaturday,
+                        tTimeOn = item.tTimeOn,
+                        tTimeOff = item.tTimeOff
+                    }).ToList(),
+                    Section6 = section6.Select((item, index) => new WeeklyTimeSwitchInputViewModel
+                    {
+                        Index = index,
+                        bEnable = item.bEnable,
+                        bSunday = item.bSunday,
+                        bMonday = item.bMonday,
+                        bTuesday = item.bTuesday,
+                        bWednesday = item.bWednesday,
+                        bThursday = item.bThursday,
+                        bFriday = item.bFriday,
+                        bSaturday = item.bSaturday,
+                        tTimeOn = item.tTimeOn,
+                        tTimeOff = item.tTimeOff
+                    }).ToList(),
+                };
 
-                _logger.LogInformation($"Index: Model widoku: {JsonSerializer.Serialize(viewModel)}");
+                _logger.LogInformation($"Index: Odczytano dane z PLC: {JsonSerializer.Serialize(viewModel)}");
                 return View(viewModel);
             }
             catch (Exception ex)
@@ -49,103 +149,48 @@ namespace WebApplication2.Controllers
             }
         }
 
-        // Akcja do aktualizacji pól BOOL (np. bBoolTest1 lub bBoolTest2)
-        [HttpPost]
-        public async Task<IActionResult> UpdateTestArray([FromBody] UpdateArrayRequest request)
+        public class UpdateWeeklyTimeSwitchRequest
         {
-            _logger.LogInformation($"Rozpoczęto akcję UpdateTestArray. Request: {JsonSerializer.Serialize(request)}");
-
-            if (request == null)
-            {
-                _logger.LogWarning("UpdateTestArray: Otrzymano nieprawidłowe żądanie.");
-                return BadRequest("Invalid request");
-            }
-
-            try
-            {
-                string variableName = $"P_IrrigationSystemTmp.stTestArray[{request.Index}].{request.Field}";
-                await _plcService.WriteVariableAsync<bool>(variableName, request.Value);
-                _logger.LogInformation($"UpdateTestArray: Zapisano wartość {request.Value} do zmiennej {variableName}.");
-                return Ok();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Błąd w akcji UpdateTestArray.");
-                return StatusCode(500, "Wystąpił błąd serwera.");
-            }
-        }
-
-        // Oddzielna akcja do aktualizacji pola czasu (Czas)
-        [HttpPost]
-        public async Task<IActionResult> UpdateTime([FromBody] UpdateTimeRequest request)
-        {
-            _logger.LogInformation($"Rozpoczęto akcję UpdateTime. Request: {JsonSerializer.Serialize(request)}");
-
-            if (request == null)
-            {
-                _logger.LogWarning("UpdateTime: Otrzymano nieprawidłowe żądanie.");
-                return BadRequest("Invalid request");
-            }
-
-            try
-            {
-                uint milliseconds = (uint)request.Time; // Konwertujemy int na uint
-                string variableName = $"P_IrrigationSystemTmp.stTestArray[{request.Index}].Czas";
-                await _plcService.WriteVariableAsync<uint>(variableName, milliseconds);
-                _logger.LogInformation($"UpdateTime: Zapisano wartość {milliseconds} do zmiennej {variableName}.");
-                return Ok();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Błąd w akcji UpdateTime.");
-                return StatusCode(500, "Wystąpił błąd serwera.");
-            }
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> GetTestArray()
-        {
-            _logger.LogInformation("Rozpoczęto akcję GetTestArray.");
-
-            try
-            {
-                List<ST_InnerStruct> data = await _plcService.ReadTestArrayAsync();
-
-                // Mapowanie na IrrigationViewModel
-                var viewModel = data.Select(item => new IrrigationViewModel
-                {
-                    Index = data.IndexOf(item),
-                    CzasRaw = item.Czas,
-                    bBoolTest1 = item.bBoolTest1,
-                    bBoolTest2 = item.bBoolTest2
-                }).ToList();
-
-                _logger.LogInformation($"GetTestArray: Odczytano dane z PLC: {JsonSerializer.Serialize(viewModel)}");
-                return Json(viewModel); // Zwracamy ViewModel
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Błąd w akcji GetTestArray.");
-                return StatusCode(500, "Wystąpił błąd serwera.");
-            }
-        }
-
-        // Model pomocniczy do aktualizacji pól BOOL
-        public class UpdateArrayRequest
-        {
+            public int Section { get; set; } // Numer sekcji (0 do 6)
             public int Index { get; set; }
             public string Field { get; set; }
             public bool Value { get; set; }
         }
 
-        // Model pomocniczy do aktualizacji pola czasu (Czas)
-        public class UpdateTimeRequest
+        [HttpPost]
+        public async Task<IActionResult> UpdateWeeklyTimeSwitch([FromBody] UpdateWeeklyTimeSwitchRequest request)
         {
-            public int Index { get; set; }
-            public int Time { get; set; } // Zmieniamy na int (milisekundy)
+            _logger.LogInformation($"Rozpoczęto akcję UpdateWeeklyTimeSwitch. Request: {JsonSerializer.Serialize(request)}");
+
+            if (request == null)
+            {
+                _logger.LogWarning("UpdateWeeklyTimeSwitch: Otrzymano nieprawidłowe żądanie.");
+                return BadRequest("Invalid request");
+            }
+
+            try
+            {
+                string variableName = request.Section switch
+                {
+                    0 => $"P_IrrigationSystem.arrWeeklyTimeSwitchInputSection0[{request.Index}].{request.Field}",
+                    1 => $"P_IrrigationSystem.arrWeeklyTimeSwitchInputSection1[{request.Index}].{request.Field}",
+                    2 => $"P_IrrigationSystem.arrWeeklyTimeSwitchInputSection2[{request.Index}].{request.Field}",
+                    3 => $"P_IrrigationSystem.arrWeeklyTimeSwitchInputSection3[{request.Index}].{request.Field}",
+                    4 => $"P_IrrigationSystem.arrWeeklyTimeSwitchInputSection4[{request.Index}].{request.Field}",
+                    5 => $"P_IrrigationSystem.arrWeeklyTimeSwitchInputSection5[{request.Index}].{request.Field}",
+                    6 => $"P_IrrigationSystem.arrWeeklyTimeSwitchInputSection6[{request.Index}].{request.Field}",
+                    _ => throw new InvalidOperationException("Invalid section")
+                };
+
+                await _plcService.WriteVariableAsync<bool>(variableName, request.Value);
+                _logger.LogInformation($"UpdateWeeklyTimeSwitch: Zapisano wartość {request.Value} do zmiennej {variableName}.");
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Błąd w akcji UpdateWeeklyTimeSwitch.");
+                return StatusCode(500, "Wystąpił błąd serwera.");
+            }
         }
-
-
-
     }
 }
