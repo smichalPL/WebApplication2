@@ -115,43 +115,43 @@ namespace PlcVariableReader
 
             { "P_IrrigationSystemTmp.stTestArray[0].bBoolTest1", typeof(bool) },
             { "P_IrrigationSystemTmp.stTestArray[0].bBoolTest2", typeof(bool) },
-            { "P_IrrigationSystemTmp.stTestArray[0].Czas", typeof(TOD) },
+            { "P_IrrigationSystemTmp.stTestArray[0].Czas", typeof(UInt32) },
 
             { "P_IrrigationSystemTmp.stTestArray[1].bBoolTest1", typeof(bool) },
             { "P_IrrigationSystemTmp.stTestArray[1].bBoolTest2", typeof(bool) },
-            { "P_IrrigationSystemTmp.stTestArray[1].Czas", typeof(TOD) },
+            { "P_IrrigationSystemTmp.stTestArray[1].Czas", typeof(UInt32) },
 
             { "P_IrrigationSystemTmp.stTestArray[2].bBoolTest1", typeof(bool) },
             { "P_IrrigationSystemTmp.stTestArray[2].bBoolTest2", typeof(bool) },
-            { "P_IrrigationSystemTmp.stTestArray[2].Czas", typeof(TOD) },
+            { "P_IrrigationSystemTmp.stTestArray[2].Czas", typeof(UInt32) },
 
             { "P_IrrigationSystemTmp.stTestArray[3].bBoolTest1", typeof(bool) },
             { "P_IrrigationSystemTmp.stTestArray[3].bBoolTest2", typeof(bool) },
-            { "P_IrrigationSystemTmp.stTestArray[3].Czas", typeof(TOD) },
+            { "P_IrrigationSystemTmp.stTestArray[3].Czas", typeof(UInt32) },
 
             { "P_IrrigationSystemTmp.stTestArray[4].bBoolTest1", typeof(bool) },
             { "P_IrrigationSystemTmp.stTestArray[4].bBoolTest2", typeof(bool) },
-            { "P_IrrigationSystemTmp.stTestArray[4].Czas", typeof(TOD) },
+            { "P_IrrigationSystemTmp.stTestArray[4].Czas", typeof(UInt32) },
 
             { "P_IrrigationSystemTmp.stTestArray[5].bBoolTest1", typeof(bool) },
             { "P_IrrigationSystemTmp.stTestArray[5].bBoolTest2", typeof(bool) },
-            { "P_IrrigationSystemTmp.stTestArray[5].Czas", typeof(TOD) },
+            { "P_IrrigationSystemTmp.stTestArray[5].Czas", typeof(UInt32) },
 
             { "P_IrrigationSystemTmp.stTestArray[6].bBoolTest1", typeof(bool) },
             { "P_IrrigationSystemTmp.stTestArray[6].bBoolTest2", typeof(bool) },
-            { "P_IrrigationSystemTmp.stTestArray[6].Czas", typeof(TOD) },
+            { "P_IrrigationSystemTmp.stTestArray[6].Czas", typeof(UInt32) },
 
             { "P_IrrigationSystemTmp.stTestArray[7].bBoolTest1", typeof(bool) },
             { "P_IrrigationSystemTmp.stTestArray[7].bBoolTest2", typeof(bool) },
-            { "P_IrrigationSystemTmp.stTestArray[7].Czas", typeof(TOD) },
+            { "P_IrrigationSystemTmp.stTestArray[7].Czas", typeof(UInt32) },
 
             { "P_IrrigationSystemTmp.stTestArray[8].bBoolTest1", typeof(bool) },
             { "P_IrrigationSystemTmp.stTestArray[8].bBoolTest2", typeof(bool) },
-            { "P_IrrigationSystemTmp.stTestArray[8].Czas", typeof(TOD) },
+            { "P_IrrigationSystemTmp.stTestArray[8].Czas", typeof(UInt32) },
 
             { "P_IrrigationSystemTmp.stTestArray[9].bBoolTest1", typeof(bool) },
             { "P_IrrigationSystemTmp.stTestArray[9].bBoolTest2", typeof(bool) },
-            { "P_IrrigationSystemTmp.stTestArray[9].Czas", typeof(TOD) },
+            { "P_IrrigationSystemTmp.stTestArray[9].Czas", typeof(UInt32) },
 
         };
 
@@ -240,7 +240,7 @@ namespace PlcVariableReader
         public List<ST_InnerStruct> ReadTestArray()
         {
             List<ST_InnerStruct> result = new List<ST_InnerStruct>();
-            int sizeOfStruct = 6; // Rozmiar struktury ST_InnerStruct w bajtach (2 bool + 4 bajty dla TOD)
+            int sizeOfStruct = 8; // Poprawiony rozmiar struktury ST_InnerStruct
 
             for (int i = 0; i < 10; i++)
             {
@@ -252,30 +252,30 @@ namespace PlcVariableReader
 
                     if (data != null && data.Length == sizeOfStruct)
                     {
-                        // Logowanie surowych danych
                         _logger.LogInformation($"Surowe dane dla indeksu {i}: {BitConverter.ToString(data)}");
 
-                        // Odczyt milisekund (4 bajty zaczynają się od indeksu 2)
-                        uint milliseconds = BitConverter.ToUInt32(data, 2);
-                        _logger.LogInformation($"Milliseconds dla indeksu {i}: {milliseconds}");
+                        // Odczyt wartości BOOL
+                        bool boolTest1 = data[0] != 0;
+                        bool boolTest2 = data[1] != 0;
 
-                        // Obsługa przypadku, gdy milisekundy są równe zero
+                        // Odczyt milisekund (początek od indeksu 4)
+                        uint milliseconds = BitConverter.ToUInt32(data, 4);
+
                         if (milliseconds == 0)
                         {
                             _logger.LogWarning($"Milliseconds dla indeksu {i} to zero. Ustawiam domyślny czas.");
                             milliseconds = 1000; // Ustawienie wartości domyślnej
                         }
 
-                        // Przekształcenie wartości milisekund na TimeSpan
                         TimeSpan timeSpan = TimeSpan.FromMilliseconds(milliseconds);
                         _logger.LogInformation($"Czas dla indeksu {i}: {timeSpan.ToString(@"hh\:mm\:ss\.fff")}");
 
                         ST_InnerStruct innerStruct = new ST_InnerStruct
                         {
-                            bBoolTest1 = (data[0] != 0),
-                            bBoolTest2 = (data[1] != 0),
-                            Czas = timeSpan // Przypisanie TimeSpan do struktury
-                        };
+                            bBoolTest1 = boolTest1,
+                            bBoolTest2 = boolTest2,
+                            Czas = (uint)timeSpan.TotalMilliseconds
+                    };
 
                         result.Add(innerStruct);
                     }
@@ -292,6 +292,7 @@ namespace PlcVariableReader
 
             return result;
         }
+
 
 
 

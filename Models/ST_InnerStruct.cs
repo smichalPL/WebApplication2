@@ -1,9 +1,16 @@
-﻿namespace WebApplication2.Models
+﻿using System.Runtime.InteropServices;
+
+namespace WebApplication2.Models
 {
-    public class ST_InnerStruct
+   // [StructLayout(LayoutKind.Sequential)]
+    public struct ST_InnerStruct
     {
-        public bool bBoolTest1 { get; set; }
-        public bool bBoolTest2 { get; set; }
-        public TimeSpan Czas { get; set; }
+       // [MarshalAs(UnmanagedType.U1)]
+        public bool bBoolTest1;
+        //[MarshalAs(UnmanagedType.U1)]
+        public bool bBoolTest2;
+        public uint Czas; // 4 bajty reprezentujące TIME_OF_DAY
+
+        public TimeSpan CzasTimeSpan => TimeSpan.FromMilliseconds(Czas);
     }
 }

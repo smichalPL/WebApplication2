@@ -1,4 +1,4 @@
-﻿@model List<WebApplication2.Models.ST_InnerStruct>
+﻿@model List<WebApplication2.Models.IrrigationViewModel>
 
 <h2>Dane z stTestArray</h2>
 
@@ -31,6 +31,7 @@
 </table>
 
 
+
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         // 1️⃣ Obsługa zmiany checkboxów (zapis do PLC)
@@ -54,15 +55,56 @@
 
         // 2️⃣ Automatyczna aktualizacja co 2 sekundy
         setInterval(() => {
-            fetch("/Irrigation/GetTestArray") // Zmienione
-                .then(response => response.json())
-                .then(data => {
-                    data.forEach((item, index) => {
-                        document.querySelector(`input[data-index="${index}"][data-field="bBoolTest1"]`).checked = item.bBoolTest1;
-                        document.querySelector(`input[data-index="${index}"][data-field="bBoolTest2"]`).checked = item.bBoolTest2;
-                    });
+            console.log("Rozpoczęto pobieranie danych z PLC...");
+
+            fetch("/Irrigation/GetTestArray")
+                .then(response => {
+                    console.log("Otrzymano odpowiedź z serwera:", response);
+                    if (!response.ok) {
+                        throw new Error(`Błąd HTTP! status: ${response.status}`);
+                    }
+                    return response.json();
                 })
-                .catch(error => console.error("Błąd pobierania danych z PLC:", error));
-        }, 2000);
+                .then(data => {
+                    console.log("Otrzymano dane z PLC:", data);
+
+                    if (!Array.isArray(data)) {
+                        console.error("Otrzymane dane nie są tablicą:", data);
+                        return; // Przerwij dalsze przetwarzanie
+                    }
+
+                    data.forEach((item, index) => {
+                        console.log(`Przetwarzanie elementu o indeksie ${index}:`, item);
+
+                        const bBoolTest1Input = document.querySelector(`input[data-index="${index}"][data-field="bBoolTest1"]`);
+                        const bBoolTest2Input = document.querySelector(`input[data-index="${index}"][data-field="bBoolTest2"]`);
+
+                        if (bBoolTest1Input) {
+                            console.log(`Ustawianie bBoolTest1 dla indeksu ${index} na:`, item.bBoolTest1);
+                            bBoolTest1Input.checked = item.bBoolTest1;
+                        } else {
+                            console.warn(`Nie znaleziono elementu bBoolTest1 dla indeksu ${index}`);
+                        }
+
+                        if (bBoolTest2Input) {
+                            console.log(`Ustawianie bBoolTest2 dla indeksu ${index} na:`, item.bBoolTest2);
+                            bBoolTest2Input.checked = item.bBoolTest2;
+                        } else {
+                            console.warn(`Nie znaleziono elementu bBoolTest2 dla indeksu ${index}`);
+                        }
+                    });
+                    console.log("Aktualizacja checkboxów zakończona.");
+                })
+                .catch(error => {
+                    console.error("Błąd pobierania danych z PLC:", error);
+                });
+
+        }, 1000);
     });
+
+    // Serializacja modelu do JSON
+    var modelJson = @Html.Raw(Json.Serialize(Model));
+
+    // Logowanie JSON w konsoli przeglądarki
+    console.log("Model z kontrolera:", modelJson);
 </script>

@@ -1,6 +1,7 @@
 ﻿using PlcVariableReader;
 using WebApplication2.Models;
 using Microsoft.Extensions.Logging; // Dodajemy using dla ILogger
+using System.Text.Json; // Dodajemy using dla JsonSerializer
 
 public class PlcService
 {
@@ -64,7 +65,19 @@ public class PlcService
         try
         {
             var result = _plcReader.ReadTestArray();
+
+            // Dodajemy logi, aby sprawdzić wartości boolowskie
+            if (result != null)
+            {
+                foreach (var item in result)
+                {
+                    _logger.LogInformation($"Odczytano element ReadTestArrayAsync: bBoolTest1={item.bBoolTest1}, bBoolTest2={item.bBoolTest2}, Czas={item.Czas}");
+                }
+            }
+
             _logger.LogInformation("Odczytano tablicę stTestArray.");
+            _logger.LogInformation($"Odczytane dane ReadTestArrayAsync: {JsonSerializer.Serialize(result)}"); // Dodajemy logowanie serializowanych danych
+
             return result;
         }
         catch (Exception ex)
