@@ -89,7 +89,7 @@ namespace WebApplication2.Controllers
 
             try
             {
-                uint milliseconds = (uint)request.Time.TotalMilliseconds;
+                uint milliseconds = (uint)request.Time; // Konwertujemy int na uint
                 string variableName = $"P_IrrigationSystemTmp.stTestArray[{request.Index}].Czas";
                 await _plcService.WriteVariableAsync<uint>(variableName, milliseconds);
                 _logger.LogInformation($"UpdateTime: Zapisano wartość {milliseconds} do zmiennej {variableName}.");
@@ -142,7 +142,10 @@ namespace WebApplication2.Controllers
         public class UpdateTimeRequest
         {
             public int Index { get; set; }
-            public TimeSpan Time { get; set; }
+            public int Time { get; set; } // Zmieniamy na int (milisekundy)
         }
+
+
+
     }
 }

@@ -22,13 +22,24 @@
                 <td>
                     <input type="checkbox" class="update-checkbox" data-index="@i" data-field="bBoolTest2" @(Model[i].bBoolTest2 ? "checked" : "") />
                 </td>
-                <td>
-                    @Model[i].Czas
+                <td onclick="openTimeModal(this)" data-index="@i" data-type="hours">
+                    @Model[i].Czas.ToString(@"hh\:mm").Split(':')[0]
+                </td>
+                <td onclick="openTimeModal(this)" data-index="@i" data-type="minutes">
+                    @Model[i].Czas.ToString(@"hh\:mm").Split(':')[1]
                 </td>
             </tr>
         }
     </tbody>
 </table>
+
+<div class="modal" id="hoursModal">
+    <input type="number" id="hoursInput" placeholder="Godziny">
+</div>
+
+<div class="modal" id="minutesModal">
+    <input type="number" id="minutesInput" placeholder="Minuty">
+</div>
 
 
 
@@ -99,8 +110,50 @@
                     console.error("Błąd pobierania danych z PLC:", error);
                 });
 
-        }, 1000);
+        }, 4000);
     });
+
+    let currentIndex;
+    let currentType;
+
+    function openTimeModal(element) {
+        currentIndex = element.getAttribute("data-index");
+        currentType = element.getAttribute("data-type");
+        if (currentType === "hours") {
+            document.getElementById("hoursModal").style.display = "block";
+            document.getElementById("hoursInput").value = parseInt(element.textContent);
+        } else {
+            document.getElementById("minutesModal").style.display = "block";
+            document.getElementById("minutesInput").value = parseInt(element.textContent);
+        }
+    }
+
+    function updateTime() {
+        let hours = document.getElementById("hoursInput").value;
+        let minutes = document.getElementById("minutesInput").value;
+
+        if (currentType === "minutes") {
+            hours = document.querySelectorAll(`[data-index='${currentIndex}'][data-type='hours']`)[0].textContent;
+        }
+        if (currentType === "hours") {
+            minutes = document.querySelectorAll(`[data-index='${currentIndex}'][data-type='minutes']`)[0].textContent;
+        }
+
+        const milliseconds = (parseInt(hours) * 3600 + parseInt(minutes) * 60) * 1000;
+        fetch("/Irrigation/UpdateTime", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ index: currentIndex, time: milliseconds })
+        });
+        document.getElementById("hoursModal").style.display = "none";
+        document.getElementById("minutesModal").style.display = "none";
+    }
+
+    document.getElementById("hoursInput").addEventListener("change", updateTime);
+    document.getElementById("minutesInput").addEventListener("change", updateTime);
+
 
     // Serializacja modelu do JSON
     var modelJson = @Html.Raw(Json.Serialize(Model));
