@@ -8,6 +8,7 @@
             <th>Index</th>
             <th>bBoolTest1</th>
             <th>bBoolTest2</th>
+            <th>Czas</th>
         </tr>
     </thead>
     <tbody id="checkboxTableBody">
@@ -21,10 +22,14 @@
                 <td>
                     <input type="checkbox" class="update-checkbox" data-index="@i" data-field="bBoolTest2" @(Model[i].bBoolTest2 ? "checked" : "") />
                 </td>
+                <td>
+                    @Model[i].Czas
+                </td>
             </tr>
         }
     </tbody>
 </table>
+
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
