@@ -11,6 +11,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Harmonogram Nawadniania</title>
     <link rel="stylesheet" href="~/css/style.css" />
+    <script src="~/Scripts/jquery-3.6.0.min.js"></script>
+
 </head>
 <body>
     <div class="container">
@@ -43,14 +45,14 @@
                         @foreach (var item in section)
                         {
                             <tr>
-                                <td>@item.bEnable</td>
-                                <td>@item.bSunday</td>
-                                <td>@item.bMonday</td>
-                                <td>@item.bTuesday</td>
-                                <td>@item.bWednesday</td>
-                                <td>@item.bThursday</td>
-                                <td>@item.bFriday</td>
-                                <td>@item.bSaturday</td>
+                                <td><input type="checkbox" class="plc-checkbox" data-section="@Array.IndexOf(sections, section)" data-index="@item.Index" data-field="bEnable" @(item.bEnable ? "checked" : "") /></td>
+                                <td><input type="checkbox" class="plc-checkbox" data-section="@Array.IndexOf(sections, section)" data-index="@item.Index" data-field="bSunday" @(item.bSunday ? "checked" : "") /></td>
+                                <td><input type="checkbox" class="plc-checkbox" data-section="@Array.IndexOf(sections, section)" data-index="@item.Index" data-field="bMonday" @(item.bMonday ? "checked" : "") /></td>
+                                <td><input type="checkbox" class="plc-checkbox" data-section="@Array.IndexOf(sections, section)" data-index="@item.Index" data-field="bTuesday" @(item.bTuesday ? "checked" : "") /></td>
+                                <td><input type="checkbox" class="plc-checkbox" data-section="@Array.IndexOf(sections, section)" data-index="@item.Index" data-field="bWednesday" @(item.bWednesday ? "checked" : "") /></td>
+                                <td><input type="checkbox" class="plc-checkbox" data-section="@Array.IndexOf(sections, section)" data-index="@item.Index" data-field="bThursday" @(item.bThursday ? "checked" : "") /></td>
+                                <td><input type="checkbox" class="plc-checkbox" data-section="@Array.IndexOf(sections, section)" data-index="@item.Index" data-field="bFriday" @(item.bFriday ? "checked" : "") /></td>
+                                <td><input type="checkbox" class="plc-checkbox" data-section="@Array.IndexOf(sections, section)" data-index="@item.Index" data-field="bSaturday" @(item.bSaturday ? "checked" : "") /></td>
                                 <td>@item.tTimeOn.ToString("hh\\:mm")</td>
                                 <td>@item.tTimeOff.ToString("hh\\:mm")</td>
                             </tr>
@@ -60,6 +62,34 @@
             </div>
         }
     </div>
+    @section Scripts {
+        <script>
+            $(document).ready(function () {
+                $('.plc-checkbox').change(function () {
+                    var section = $(this).data('section');
+                    var index = $(this).data('index');
+                    var field = $(this).data('field');
+                    var value = $(this).is(':checked');
 
+                    $.ajax({
+                        url: '/Irrigation/UpdateWeeklyTimeSwitch',
+                        type: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify({ section: section, index: index, field: field, value: value }),
+                        success: function () {
+                            console.log('Zapisano wartość do PLC.');
+                        },
+                        error: function () {
+                            console.error('Błąd zapisu do PLC.');
+                        }
+                    });
+                });
+
+                setInterval(function () {
+                    location.reload();
+                }, 2000);
+            });
+        </script>
+    }
 </body>
 </html>
