@@ -112,8 +112,48 @@ namespace PlcVariableReader
             { "MyGVL.iPressure", typeof(Int32) },
             { "MyGVL.MomentarySwitch", typeof(bool) },
             { "MyGVL.ToggleSwitch", typeof(bool) },
-
         };
+
+        static PlcReader()
+        {
+            // Definicja pól dla jednego elementu tablicy
+            string[] fieldsBool = new string[]
+            {
+        "bEnable",
+        "bSunday",
+        "bMonday",
+        "bTuesday",
+        "bWednesday",
+        "bThursday",
+        "bFriday",
+        "bSaturday"
+            };
+
+            string[] fieldsTime = new string[]
+            {
+        "tTimeOn",
+        "tTimeOff"
+            };
+
+            // Zakładamy, że mamy 7 sekcji (0-6) i 2 elementy w każdej
+            for (int section = 0; section <= 6; section++)
+            {
+                for (int index = 0; index < 2; index++)
+                {
+                    string baseKey = $"P_IrrigationSystem.arrWeeklyTimeSwitchInputSection{section}[{index}]";
+                    // Pola typu bool
+                    foreach (var field in fieldsBool)
+                    {
+                        _plcVariables.Add($"{baseKey}.{field}", typeof(bool));
+                    }
+                    // Pola czasu – tutaj zakładamy, że zapisujemy jako TimeSpan
+                    foreach (var field in fieldsTime)
+                    {
+                        _plcVariables.Add($"{baseKey}.{field}", typeof(TOD));
+                    }
+                }
+            }
+        }
 
         public PlcReader(IOptions<PlcConfiguration> plcConfiguration, ILogger<PlcReader> logger)
         {
@@ -167,6 +207,8 @@ namespace PlcVariableReader
 
         public void WriteVariable<T>(string variableName, T value)
         {
+            _logger.LogInformation($"Próba zapisu zmiennej '{variableName}' wartością: {value}");
+
             if (!_plcVariables.ContainsKey(variableName))
                 throw new ArgumentException($"Zmienna '{variableName}' nie istnieje w słowniku.");
 

@@ -11,7 +11,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Harmonogram Nawadniania</title>
     <link rel="stylesheet" href="~/css/style.css" />
-
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
     <div class="container">
@@ -20,10 +20,12 @@
         @{
             var sections = new[] { Model.Section0, Model.Section1, Model.Section2, Model.Section3, Model.Section4, Model.Section5, Model.Section6 };
         }
-        @foreach (var section in sections)
+
+        @for (int sectionIndex = 0; sectionIndex < sections.Length; sectionIndex++)
         {
+            var section = sections[sectionIndex];
             <div class="section">
-                <h3>Section @Array.IndexOf(sections, section)</h3>
+                <h3>Section @sectionIndex</h3>
 
                 <table class="table">
                     <thead>
@@ -44,16 +46,23 @@
                         @foreach (var item in section)
                         {
                             <tr>
-                                <td><input type="checkbox" class="plc-checkbox" data-section="@Array.IndexOf(sections, section)" data-index="@item.Index" data-field="bEnable" @(item.bEnable ? "checked" : "") /></td>
-                                <td><input type="checkbox" class="plc-checkbox" data-section="@Array.IndexOf(sections, section)" data-index="@item.Index" data-field="bSunday" @(item.bSunday ? "checked" : "") /></td>
-                                <td><input type="checkbox" class="plc-checkbox" data-section="@Array.IndexOf(sections, section)" data-index="@item.Index" data-field="bMonday" @(item.bMonday ? "checked" : "") /></td>
-                                <td><input type="checkbox" class="plc-checkbox" data-section="@Array.IndexOf(sections, section)" data-index="@item.Index" data-field="bTuesday" @(item.bTuesday ? "checked" : "") /></td>
-                                <td><input type="checkbox" class="plc-checkbox" data-section="@Array.IndexOf(sections, section)" data-index="@item.Index" data-field="bWednesday" @(item.bWednesday ? "checked" : "") /></td>
-                                <td><input type="checkbox" class="plc-checkbox" data-section="@Array.IndexOf(sections, section)" data-index="@item.Index" data-field="bThursday" @(item.bThursday ? "checked" : "") /></td>
-                                <td><input type="checkbox" class="plc-checkbox" data-section="@Array.IndexOf(sections, section)" data-index="@item.Index" data-field="bFriday" @(item.bFriday ? "checked" : "") /></td>
-                                <td><input type="checkbox" class="plc-checkbox" data-section="@Array.IndexOf(sections, section)" data-index="@item.Index" data-field="bSaturday" @(item.bSaturday ? "checked" : "") /></td>
-                                <td>@item.tTimeOn.ToString("hh\\:mm")</td>
-                                <td>@item.tTimeOff.ToString("hh\\:mm")</td>
+                                <!-- Checkboxy -->
+                                <td><input type="checkbox" class="plc-checkbox" data-section="@sectionIndex" data-index="@item.Index" data-field="bEnable" @(item.bEnable ? "checked" : "") /></td>
+                                <td><input type="checkbox" class="plc-checkbox" data-section="@sectionIndex" data-index="@item.Index" data-field="bSunday" @(item.bSunday ? "checked" : "") /></td>
+                                <td><input type="checkbox" class="plc-checkbox" data-section="@sectionIndex" data-index="@item.Index" data-field="bMonday" @(item.bMonday ? "checked" : "") /></td>
+                                <td><input type="checkbox" class="plc-checkbox" data-section="@sectionIndex" data-index="@item.Index" data-field="bTuesday" @(item.bTuesday ? "checked" : "") /></td>
+                                <td><input type="checkbox" class="plc-checkbox" data-section="@sectionIndex" data-index="@item.Index" data-field="bWednesday" @(item.bWednesday ? "checked" : "") /></td>
+                                <td><input type="checkbox" class="plc-checkbox" data-section="@sectionIndex" data-index="@item.Index" data-field="bThursday" @(item.bThursday ? "checked" : "") /></td>
+                                <td><input type="checkbox" class="plc-checkbox" data-section="@sectionIndex" data-index="@item.Index" data-field="bFriday" @(item.bFriday ? "checked" : "") /></td>
+                                <td><input type="checkbox" class="plc-checkbox" data-section="@sectionIndex" data-index="@item.Index" data-field="bSaturday" @(item.bSaturday ? "checked" : "") /></td>
+
+                                <!-- Time inputs -->
+                                <td>
+                                    <input type="time" class="plc-time" data-section="@sectionIndex" data-index="@item.Index" data-field="tTimeOn" value="@item.tTimeOn.ToString("hh\\:mm")" />
+                                </td>
+                                <td>
+                                    <input type="time" class="plc-time" data-section="@sectionIndex" data-index="@item.Index" data-field="tTimeOff" value="@item.tTimeOff.ToString("hh\\:mm")" />
+                                </td>
                             </tr>
                         }
                     </tbody>
@@ -61,34 +70,91 @@
             </div>
         }
     </div>
-    @section Scripts {
-        <script>
-            $(document).ready(function () {
-                $('.plc-checkbox').change(function () {
-                    var section = $(this).data('section');
-                    var index = $(this).data('index');
-                    var field = $(this).data('field');
-                    var value = $(this).is(':checked');
 
-                    $.ajax({
-                        url: '/Irrigation/UpdateWeeklyTimeSwitch',
-                        type: 'POST',
-                        contentType: 'application/json',
-                        data: JSON.stringify({ section: section, index: index, field: field, value: value }),
-                        success: function () {
-                            console.log('Zapisano wartość do PLC.');
-                        },
-                        error: function () {
-                            console.error('Błąd zapisu do PLC.');
+    <script>
+        $(document).ready(function () {
+            console.log("📢 Skrypt załadowany!");
+
+            // Funkcja obsługująca zmianę checkboxów
+            function handleCheckboxChange(element) {
+                console.log("handleCheckboxChange - Element:", element);
+                var section = $(element).data('section');
+                var index = $(element).data('index');
+                var field = $(element).data('field');
+                var value = $(element).is(':checked');  // Boolean dla checkboxa
+
+                console.log("handleCheckboxChange - Dane:", { section: section, index: index, field: field, value: value });
+                sendDataToServer(section, index, field, value);
+            }
+
+            // Funkcja obsługująca zmianę czasu
+            function handleTimeChange(element) {
+                console.log("handleTimeChange - Element:", element);
+                var section = $(element).data('section');
+                var index = $(element).data('index');
+                var field = $(element).data('field');
+                var value = $(element).val();  // String w formacie HH:mm
+
+                console.log("handleTimeChange - Dane:", { section: section, index: index, field: field, value: value });
+                sendDataToServer(section, index, field, value);
+            }
+
+            // Wysyłanie danych do serwera za pomocą Fetch API
+            function sendDataToServer(section, index, field, value) {
+                console.log(`📤 Wysyłanie danych: section=${section}, index=${index}, field=${field}, value=${value}`);
+                console.log("sendDataToServer - Dane do wysłania:", { section: section, index: index, field: field, value: value });
+
+                fetch('/Irrigation/UpdateWeeklyTimeSwitch', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        section: section,
+                        index: index,
+                        field: field,
+                        value: value
+                    })
+                })
+                    .then(response => {
+                        console.log("sendDataToServer - Odpowiedź serwera:", response);
+                        if (!response.ok) {
+                            return response.json().then(errorData => {
+                                throw new Error(errorData.error || `Błąd HTTP! status: ${response.status}`);
+                            });
                         }
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log('✅ Zapisano wartość do PLC.', data);
+                    })
+                    .catch(error => {
+                        console.error('❌ Błąd zapisu do PLC:', error);
+                        console.error('Dane wysyłane w Fetch: ', { section: section, index: index, field: field, value: value });
+                        alert(`Wystąpił błąd podczas zapisu do PLC: ${error.message}. Spróbuj ponownie.`);
                     });
-                });
+            }
 
-                setInterval(function () {
-                    location.reload();
-                }, 2000);
+            // Obsługa zmiany dla checkboxów
+            $('.plc-checkbox').change(function () {
+                console.log("Checkbox changed:", this);
+                handleCheckboxChange(this);
             });
-        </script>
-    }
+
+            // Obsługa zmiany dla inputów czasu
+            $('.plc-time').change(function () {
+                console.log("Time input changed:", this);
+                handleTimeChange(this);
+            });
+
+            // Odświeżanie strony po 200 sekundach, jeżeli żadna kontrolka nie jest w stanie focusu
+            setInterval(function () {
+                if (!$(':focus').is('input')) {
+                    console.log("🔄 Odświeżanie strony...");
+                    location.reload();
+                }
+            }, 200000);
+        });
+    </script>
 </body>
 </html>
