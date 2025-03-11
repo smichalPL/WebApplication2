@@ -9,6 +9,8 @@
         public List<WeeklyTimeSwitchInputViewModel> Section4 { get; set; }
         public List<WeeklyTimeSwitchInputViewModel> Section5 { get; set; }
         public List<WeeklyTimeSwitchInputViewModel> Section6 { get; set; }
+
+        public bool[] ValveSwitch { get; set; }
     }
 
 }
