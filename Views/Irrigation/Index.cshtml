@@ -1,19 +1,16 @@
 ﻿@model WebApplication2.Models.WeeklyTimeSwitchCompositeViewModel
 
 @{
-    Layout = null;
+    ViewData["Title"] = "Harmonogram Nawadniania";
 }
+<h1>@ViewData["Title"]</h1>
 
-<!DOCTYPE html>
-<html lang="pl">
+<p>View room: Harmonogram Nawadniania</p>
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Harmonogram Nawadniania</title>
     <link rel="stylesheet" href="~/css/style.css" />
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
-<body>
+
     <div class="container">
         <h2>Harmonogram Nawadniania</h2>
 
@@ -147,14 +144,12 @@
                 handleTimeChange(this);
             });
 
-            // Odświeżanie strony po 200 sekundach, jeżeli żadna kontrolka nie jest w stanie focusu
+            // Odświeżanie strony po 2 sekundach, jeżeli żadna kontrolka nie jest w stanie focusu
             setInterval(function () {
                 if (!$(':focus').is('input')) {
                     console.log("🔄 Odświeżanie strony...");
                     location.reload();
                 }
-            }, 200000);
+            }, 2000);
         });
     </script>
-</body>
-</html>
