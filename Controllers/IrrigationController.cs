@@ -8,6 +8,7 @@ using PlcVariableReader;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text;
+using TwinCAT.PlcOpen;
 
 namespace WebApplication2.Controllers
 {
@@ -146,20 +147,37 @@ namespace WebApplication2.Controllers
                 }
                 else // Zakładamy, że pozostałe pola to czas
                 {
-                    if (request.Value.ValueKind == JsonValueKind.String && request.Value.TryGetDateTime(out DateTime dateTime))
+                    if (request.Value.ValueKind == JsonValueKind.String)
                     {
-                        TimeSpan time = dateTime.TimeOfDay;
-                        uint todValue = (uint)time.TotalSeconds;
-                        _logger.LogInformation($"Zapisuję czas {todValue} do zmiennej {variableName}");
-                        await _plcService.WriteVariableAsync<uint>(variableName, todValue);
-                        _logger.LogInformation($"UpdateWeeklyTimeSwitch: Zapisano czas {todValue} do zmiennej {variableName}.");
-                    }
+                        string timeString = request.Value.GetString();
+                        _logger.LogInformation($"Otrzymano wartość czasu jako string: {timeString}");
 
+                        // Jeśli format to "HH:mm", dodaj ":00"
+                        if (timeString.Length == 5 && timeString.Count(c => c == ':') == 1)
+                        {
+                            timeString += ":00";
+                            _logger.LogInformation($"Poprawiony format czasu: {timeString}");
+                        }
+
+                        if (TimeSpan.TryParse(timeString, out TimeSpan time))
+                        {
+                            TOD todValue = new TOD(time); // lub inna właściwa konwersja
+                            await _plcService.WriteVariableAsync<TOD>(variableName, todValue);
+                            _logger.LogInformation($"UpdateWeeklyTimeSwitch: Zapisano czas {time} do zmiennej {variableName}.");
+                            return Ok(new { success = true });
+                        }
+                        else
+                        {
+                            _logger.LogWarning($"Nie udało się sparsować wartości czasu: {timeString}");
+                            return BadRequest(new { error = "Invalid time format" });
+                        }
+                    }
                     else
                     {
-                        _logger.LogWarning("UpdateWeeklyTimeSwitch: Nieprawidłowy format czasu.");
+                        _logger.LogWarning($"UpdateWeeklyTimeSwitch: Oczekiwano stringa, ale otrzymano {request.Value.ValueKind}");
                         return BadRequest(new { error = "Invalid time format" });
                     }
+
                 }
 
                 return Ok(new { success = true });
