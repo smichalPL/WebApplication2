@@ -1,3 +1,16 @@
+.section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.toggle-button {
+    padding: 5px 10px;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+}
 .toggle-button-true {
     background-color: darkgray;
     color: white;

@@ -42,6 +42,9 @@ namespace WebApplication2.Controllers
                     await _plcService.ReadWeeklyTimeSwitchArrayAsync("P_IrrigationSystem.arrWeeklyTimeSwitchInputSection6", 2)
                 };
 
+                var valveStates = await _plcService.ReadBoolArrayAsync("P_IrrigationSystem.bValveSwitchHMI", 6);
+
+
                 var viewModel = new WeeklyTimeSwitchCompositeViewModel
                 {
                     Section0 = sections[0].Select((item, index) => MapToViewModel(item, index)).ToList(),
@@ -51,6 +54,7 @@ namespace WebApplication2.Controllers
                     Section4 = sections[4].Select((item, index) => MapToViewModel(item, index)).ToList(),
                     Section5 = sections[5].Select((item, index) => MapToViewModel(item, index)).ToList(),
                     Section6 = sections[6].Select((item, index) => MapToViewModel(item, index)).ToList(),
+                    ValveSwitch = valveStates
                 };
 
                 _logger.LogInformation($"Index: Odczytano dane z PLC: {JsonSerializer.Serialize(viewModel)}");
@@ -188,5 +192,30 @@ namespace WebApplication2.Controllers
                 return StatusCode(500, new { error = "Wystąpił błąd serwera." });
             }
         }
+        [HttpPost]
+        public async Task<IActionResult> UpdateValveState([FromBody] ValveUpdateRequest request)
+        {
+            if (request == null || request.Index < 0 || request.Index >= 6)
+            {
+                return BadRequest(new { error = "Invalid request" });
+            }
+
+            try
+            {
+                string variableName = $"P_IrrigationSystem.bValveSwitchHMI[{request.Index}]";
+                _logger.LogInformation($"UpdateValveState: Zapisuję wartość {request.State} do zmiennej {variableName}");
+
+                await _plcService.WriteVariableAsync<bool>(variableName, request.State);
+
+                _logger.LogInformation($"UpdateValveState: Zapisano wartość {request.State} do zmiennej {variableName}.");
+                return Ok(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Błąd w akcji UpdateValveState.");
+                return StatusCode(500, new { error = "Wystąpił błąd serwera." });
+            }
+        }
+
     }
 }

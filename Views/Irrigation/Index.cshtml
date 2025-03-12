@@ -6,6 +6,7 @@
 <h1>@ViewData["Title"]</h1>
 
 <p>View room: Harmonogram Nawadniania</p>
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,97 +14,137 @@
     <script src="/js/jquery-3.6.0.min.js"></script>
 </head>
 
-    <div class="container">
-        <h2>Harmonogram Nawadniania</h2>
+<div class="container">
+    <h2>Sterowanine ręczne zaworami</h2>
 
-        @{
-            var sections = new[] { Model.Section0, Model.Section1, Model.Section2, Model.Section3, Model.Section4, Model.Section5, Model.Section6 };
-        }
-
-        @for (int sectionIndex = 0; sectionIndex < sections.Length; sectionIndex++)
+    @{
+        var sections = new[] { Model.Section0, Model.Section1, Model.Section2, Model.Section3, Model.Section4, Model.Section5, Model.Section6 };
+    }
+       
+        @for (int i = 0; i < Model.ValveSwitch.Length; i++)
         {
-            var section = sections[sectionIndex];
-            <div class="section">
-                <h3>Section @sectionIndex</h3>
-
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Enabled</th>
-                            <th>Sunday</th>
-                            <th>Monday</th>
-                            <th>Tuesday</th>
-                            <th>Wednesday</th>
-                            <th>Thursday</th>
-                            <th>Friday</th>
-                            <th>Saturday</th>
-                            <th>Time On</th>
-                            <th>Time Off</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var item in section)
-                        {
-                            <tr>
-                                <!-- Checkboxy -->
-                                <td><input type="checkbox" class="plc-checkbox" data-section="@sectionIndex" data-index="@item.Index" data-field="bEnable" @(item.bEnable ? "checked" : "") /></td>
-                                <td><input type="checkbox" class="plc-checkbox" data-section="@sectionIndex" data-index="@item.Index" data-field="bSunday" @(item.bSunday ? "checked" : "") /></td>
-                                <td><input type="checkbox" class="plc-checkbox" data-section="@sectionIndex" data-index="@item.Index" data-field="bMonday" @(item.bMonday ? "checked" : "") /></td>
-                                <td><input type="checkbox" class="plc-checkbox" data-section="@sectionIndex" data-index="@item.Index" data-field="bTuesday" @(item.bTuesday ? "checked" : "") /></td>
-                                <td><input type="checkbox" class="plc-checkbox" data-section="@sectionIndex" data-index="@item.Index" data-field="bWednesday" @(item.bWednesday ? "checked" : "") /></td>
-                                <td><input type="checkbox" class="plc-checkbox" data-section="@sectionIndex" data-index="@item.Index" data-field="bThursday" @(item.bThursday ? "checked" : "") /></td>
-                                <td><input type="checkbox" class="plc-checkbox" data-section="@sectionIndex" data-index="@item.Index" data-field="bFriday" @(item.bFriday ? "checked" : "") /></td>
-                                <td><input type="checkbox" class="plc-checkbox" data-section="@sectionIndex" data-index="@item.Index" data-field="bSaturday" @(item.bSaturday ? "checked" : "") /></td>
-
-                                <!-- Time inputs -->
-                                <td>
-                                    <input type="time" class="plc-time" data-section="@sectionIndex" data-index="@item.Index" data-field="tTimeOn" value="@item.tTimeOn.ToString("hh\\:mm")" />
-                                </td>
-                                <td>
-                                    <input type="time" class="plc-time" data-section="@sectionIndex" data-index="@item.Index" data-field="tTimeOff" value="@item.tTimeOff.ToString("hh\\:mm")" />
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
+            <th>
+                <button class="toggle-button @(Model.ValveSwitch[i] ? "toggle-button-true" : "toggle-button-false")"
+                        data-section="@i">
+                    @(Model.ValveSwitch[i] ? "ON" : "OFF")
+                </button>
+            </th>
         }
-    </div>
+  
+    @for (int sectionIndex = 0; sectionIndex < sections.Length; sectionIndex++)
+    {
+        var section = sections[sectionIndex];
+        <div class="section">
+            <h3>Section @sectionIndex</h3>
 
-    @section Scripts {
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Enabled</th>
+                        <th>Sunday</th>
+                        <th>Monday</th>
+                        <th>Tuesday</th>
+                        <th>Wednesday</th>
+                        <th>Thursday</th>
+                        <th>Friday</th>
+                        <th>Saturday</th>
+                        <th>Time On</th>
+                        <th>Time Off</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in section)
+                    {
+                        <tr>
+                            <td><input type="checkbox" class="plc-checkbox" data-section="@sectionIndex" data-index="@item.Index" data-field="bEnable" @(item.bEnable ? "checked" : "") /></td>
+                            <td><input type="checkbox" class="plc-checkbox" data-section="@sectionIndex" data-index="@item.Index" data-field="bSunday" @(item.bSunday ? "checked" : "") /></td>
+                            <td><input type="checkbox" class="plc-checkbox" data-section="@sectionIndex" data-index="@item.Index" data-field="bMonday" @(item.bMonday ? "checked" : "") /></td>
+                            <td><input type="checkbox" class="plc-checkbox" data-section="@sectionIndex" data-index="@item.Index" data-field="bTuesday" @(item.bTuesday ? "checked" : "") /></td>
+                            <td><input type="checkbox" class="plc-checkbox" data-section="@sectionIndex" data-index="@item.Index" data-field="bWednesday" @(item.bWednesday ? "checked" : "") /></td>
+                            <td><input type="checkbox" class="plc-checkbox" data-section="@sectionIndex" data-index="@item.Index" data-field="bThursday" @(item.bThursday ? "checked" : "") /></td>
+                            <td><input type="checkbox" class="plc-checkbox" data-section="@sectionIndex" data-index="@item.Index" data-field="bFriday" @(item.bFriday ? "checked" : "") /></td>
+                            <td><input type="checkbox" class="plc-checkbox" data-section="@sectionIndex" data-index="@item.Index" data-field="bSaturday" @(item.bSaturday ? "checked" : "") /></td>
+                            <td><input type="time" class="plc-time" data-section="@sectionIndex" data-index="@item.Index" data-field="tTimeOn" value="@item.tTimeOn.ToString("hh\\:mm")" /></td>
+                            <td><input type="time" class="plc-time" data-section="@sectionIndex" data-index="@item.Index" data-field="tTimeOff" value="@item.tTimeOff.ToString("hh\\:mm")" /></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+@section Scripts {
     <script>
+        function toggleValve(section) {
+            var button = $("button[data-section='" + section + "']");
+            var isOn = button.hasClass("toggle-button-true");
+            var newState = !isOn;
+
+            fetch('/Irrigation/UpdateValveState', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    index: section,
+                    state: newState
+                })
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(errorData => {
+                            throw new Error(errorData.error || `Błąd HTTP! status: ${response.status}`);
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('✅ Zmieniono stan zaworu.', data);
+                    button.toggleClass("toggle-button-true toggle-button-false");
+                    button.text(newState ? "ON" : "OFF");
+                })
+                .catch(error => {
+                    console.error('❌ Błąd zmiany stanu zaworu:', error);
+                    alert(`Wystąpił błąd podczas zmiany stanu zaworu: ${error.message}. Spróbuj ponownie.`);
+                });
+        }
+
         $(document).ready(function () {
             console.log("📢 Skrypt załadowany!");
 
-            // Funkcja obsługująca zmianę checkboxów
+            $('.toggle-button').click(function () {
+                var section = $(this).data('section');
+                toggleValve(section);
+            });
+
+            $('.plc-checkbox').change(function () {
+                handleCheckboxChange(this);
+            });
+
+            $('.plc-time').change(function () {
+                handleTimeChange(this);
+            });
+
             function handleCheckboxChange(element) {
-                console.log("handleCheckboxChange - Element:", element);
                 var section = $(element).data('section');
                 var index = $(element).data('index');
                 var field = $(element).data('field');
-                var value = $(element).is(':checked');  // Boolean dla checkboxa
+                var value = $(element).is(':checked');
 
-                console.log("handleCheckboxChange - Dane:", { section: section, index: index, field: field, value: value });
                 sendDataToServer(section, index, field, value);
             }
 
-            // Funkcja obsługująca zmianę czasu
             function handleTimeChange(element) {
-                console.log("handleTimeChange - Element:", element);
                 var section = $(element).data('section');
                 var index = $(element).data('index');
                 var field = $(element).data('field');
-                var value = $(element).val();  // String w formacie HH:mm
+                var value = $(element).val();
 
-                console.log("handleTimeChange - Dane:", { section: section, index: index, field: field, value: value });
                 sendDataToServer(section, index, field, value);
             }
 
-            // Wysyłanie danych do serwera za pomocą Fetch API
             function sendDataToServer(section, index, field, value) {
-                console.log(`📤 Wysyłanie danych: section=${section}, index=${index}, field=${field}, value=${value}`);
-                console.log("sendDataToServer - Dane do wysłania:", { section: section, index: index, field: field, value: value });
-
                 fetch('/Irrigation/UpdateWeeklyTimeSwitch', {
                     method: 'POST',
                     headers: {
@@ -117,7 +158,6 @@
                     })
                 })
                     .then(response => {
-                        console.log("sendDataToServer - Odpowiedź serwera:", response);
                         if (!response.ok) {
                             return response.json().then(errorData => {
                                 throw new Error(errorData.error || `Błąd HTTP! status: ${response.status}`);
@@ -130,24 +170,10 @@
                     })
                     .catch(error => {
                         console.error('❌ Błąd zapisu do PLC:', error);
-                        console.error('Dane wysyłane w Fetch: ', { section: section, index: index, field: field, value: value });
                         alert(`Wystąpił błąd podczas zapisu do PLC: ${error.message}. Spróbuj ponownie.`);
                     });
             }
 
-            // Obsługa zmiany dla checkboxów
-            $('.plc-checkbox').change(function () {
-                console.log("Checkbox changed:", this);
-                handleCheckboxChange(this);
-            });
-
-            // Obsługa zmiany dla inputów czasu
-            $('.plc-time').change(function () {
-                console.log("Time input changed:", this);
-                handleTimeChange(this);
-            });
-
-            // Odświeżanie strony po 2 sekundach, jeżeli żadna kontrolka nie jest w stanie focusu
             setInterval(function () {
                 if (!$(':focus').is('input')) {
                     console.log("🔄 Odświeżanie strony...");

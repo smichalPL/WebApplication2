@@ -116,6 +116,13 @@ namespace PlcVariableReader
 
         static PlcReader()
         {
+            _plcVariables.Add("P_IrrigationSystem.bValveSwitchHMI", typeof(bool[])); // Dodaj całą tablicę
+
+            for (int i = 0; i <= 6; i++) // Dodaj też pojedyncze elementy
+            {
+                _plcVariables.Add($"P_IrrigationSystem.bValveSwitchHMI[{i}]", typeof(bool));
+            }
+
             // Definicja pól dla jednego elementu tablicy
             string[] fieldsBool = new string[]
             {
@@ -213,6 +220,8 @@ namespace PlcVariableReader
                 throw new ArgumentException($"Zmienna '{variableName}' nie istnieje w słowniku.");
 
             Type expectedType = _plcVariables[variableName];
+            _logger.LogInformation($"Typ zmiennej '{variableName}' w słowniku: {expectedType.Name}");
+
             if (typeof(T) != expectedType)
                 throw new ArgumentException($"Niezgodność typów dla '{variableName}'. Oczekiwano '{expectedType.Name}', a podano '{typeof(T).Name}'.");
 
@@ -287,6 +296,47 @@ namespace PlcVariableReader
 
             return result;
         }
+
+        public bool[] ReadBoolArray(string variableName, int length)
+        {
+            var handle = _adsClient.CreateVariableHandle(variableName);
+            try
+            {
+                // Pobierz handle do zmiennej
+                handle = _adsClient.CreateVariableHandle(variableName);
+
+                // Odczytaj tablicę bool
+                return (bool[])_adsClient.ReadAny(handle, typeof(bool[]), new int[] { length });
+            }
+            finally
+            {
+                if (handle != 0)
+                {
+                    _adsClient.DeleteVariableHandle(handle); // Zwolnij handle
+                }
+            }
+        }
+
+
+
+        public void WriteBoolArray(string variableName, bool[] values)
+        {
+            var handle = _adsClient.CreateVariableHandle(variableName);
+            try
+            {
+                // Zapisz tablicę bool do PLC
+                _adsClient.WriteAny(handle, values);
+            }
+            finally
+            {
+                if (handle != 0)
+                {
+                    _adsClient.DeleteVariableHandle(handle); // Zwolnij handle
+                }
+            }
+        }
+
+
 
 
 

@@ -78,6 +78,16 @@ public class PlcService
             _semaphore.Release();
         }
     }
+    public async Task<bool[]> ReadBoolArrayAsync(string variableName, int length)
+    {
+        return await Task.Run(() => _plcReader.ReadBoolArray(variableName, length));
+    }
+
+    public async Task WriteBoolArrayAsync(string variableName, bool[] values)
+    {
+        await Task.Run(() => _plcReader.WriteBoolArray(variableName, values));
+    }
+
 
 
 }
