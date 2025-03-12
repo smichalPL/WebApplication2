@@ -42,7 +42,7 @@ namespace WebApplication2.Controllers
                     await _plcService.ReadWeeklyTimeSwitchArrayAsync("P_IrrigationSystem.arrWeeklyTimeSwitchInputSection6", 2)
                 };
 
-                var valveStates = await _plcService.ReadBoolArrayAsync("P_IrrigationSystem.bValveSwitchHMI", 6);
+                var valveStates = await _plcService.ReadBoolArrayAsync("P_IrrigationSystem.bValveSwitchHMI", 7);
 
 
                 var viewModel = new WeeklyTimeSwitchCompositeViewModel
@@ -195,7 +195,7 @@ namespace WebApplication2.Controllers
         [HttpPost]
         public async Task<IActionResult> UpdateValveState([FromBody] ValveUpdateRequest request)
         {
-            if (request == null || request.Index < 0 || request.Index >= 6)
+            if (request == null || request.Index < 0 || request.Index >= 7)
             {
                 return BadRequest(new { error = "Invalid request" });
             }
