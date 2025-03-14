@@ -5,21 +5,43 @@
     gap: 10px;
 }
 
+/* Uniwersalny styl dla przycisków toggle */
 .toggle-button {
-    padding: 5px 10px;
+    padding: 15px;
     border: none;
     cursor: pointer;
-    font-weight: bold;
+    font-size: 2rem;
+    background: transparent;
+    transition: background-color 0.3s ease-in-out;
 }
+
+/* Stan W£¥CZONY (ON) */
 .toggle-button-true {
     background-color: darkgray;
     color: white;
 }
 
+/* Stan WY£¥CZONY (OFF) */
 .toggle-button-false {
     background-color: lightgray;
     color: black;
 }
+
+/* Animacja ikon */
+.toggle-button i {
+    transition: color 0.3s ease-in-out;
+}
+
+/* Kolor ikon, gdy przycisk jest W£¥CZONY */
+.toggle-button-true i {
+    color: blue;
+}
+
+/* Kolor ikon, gdy przycisk jest WY£¥CZONY */
+.toggle-button-false i {
+    color: gray;
+}
+
 
 #i-pressure-display {
     cursor: pointer;

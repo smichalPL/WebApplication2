@@ -11,6 +11,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="~/css/style.css" />
+    <link rel="stylesheet" href="~/lib/font-awesome/css/all.min.css">
     <script src="/js/jquery-3.6.0.min.js"></script>
 </head>
 
@@ -20,15 +21,18 @@
     @{
         var sections = new[] { Model.Section0, Model.Section1, Model.Section2, Model.Section3, Model.Section4, Model.Section5, Model.Section6 };
     }
-       
-        @for (int i = 0; i < Model.ValveSwitch.Length; i++)
-        {
-                <button class="toggle-button @(Model.ValveSwitch[i] ? "toggle-button-true" : "toggle-button-false")"
-                        data-section="@i">
-                    @(Model.ValveSwitch[i] ? "ON" : "OFF")
-                </button>
-        }
-  
+
+    @for (int i = 0; i < Model.ValveSwitch.Length; i++)
+    {
+        <button class="toggle-button @(Model.ValveSwitch[i] ? "toggle-button-true" : "toggle-button-false")"
+                data-url="/Irrigation/UpdateValveState"
+                data-index="@i"
+                data-icon-on="fa-tint"
+                data-icon-off="fa-tint-slash">
+            <i class="fas @(Model.ValveSwitch[i] ? "fa-tint" : "fa-tint-slash")"></i>
+        </button>
+    }
+
     @for (int sectionIndex = 0; sectionIndex < sections.Length; sectionIndex++)
     {
         var section = sections[sectionIndex];
@@ -74,47 +78,60 @@
 
 @section Scripts {
     <script>
-        function toggleValve(section) {
-            var button = $("button[data-section='" + section + "']");
-            var isOn = button.hasClass("toggle-button-true");
-            var newState = !isOn;
-
-            fetch('/Irrigation/UpdateValveState', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    index: section,
-                    state: newState
-                })
-            })
-                .then(response => {
-                    if (!response.ok) {
-                        return response.json().then(errorData => {
-                            throw new Error(errorData.error || `Błąd HTTP! status: ${response.status}`);
-                        });
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('✅ Zmieniono stan zaworu.', data);
-                    button.toggleClass("toggle-button-true toggle-button-false");
-                    button.text(newState ? "ON" : "OFF");
-                })
-                .catch(error => {
-                    console.error('❌ Błąd zmiany stanu zaworu:', error);
-                    alert(`Wystąpił błąd podczas zmiany stanu zaworu: ${error.message}. Spróbuj ponownie.`);
-                });
-        }
-
         $(document).ready(function () {
             console.log("📢 Skrypt załadowany!");
 
+            function updateValveStates() {
+                fetch('/Irrigation/UpdateValveState')
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log("🔄 Aktualizacja przycisków", data);
+                        $('.toggle-button').each(function () {
+                            var button = $(this);
+                            var index = button.data('index');
+                            var state = data[index];
+
+                            button.toggleClass("toggle-button-true", state)
+                                .toggleClass("toggle-button-false", !state)
+                                .toggleClass("active", state);
+
+                            var icon = button.find("i");
+                            icon.toggleClass("fa-tint", state)
+                                .toggleClass("fa-tint-slash", !state);
+                        });
+                    })
+                    .catch(error => console.error("❌ Błąd pobierania stanów zaworów:", error));
+            }
+
+            // 🔹 Pierwsze pobranie danych
+            updateValveStates();
+
+            // 🔹 Obsługa kliknięcia przycisku
             $('.toggle-button').click(function () {
-                var section = $(this).data('section');
-                toggleValve(section);
+                var button = $(this);
+                var index = button.data('index');
+                var newState = !button.hasClass("toggle-button-true");
+
+                fetch('/Irrigation/UpdateValveState', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ index: index, state: newState })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('✅ Zmieniono stan zaworu.', data);
+
+                        // 🔹 Odśwież stan zaworów po zmianie
+                        updateValveStates();
+                    })
+                    .catch(error => {
+                        console.error('❌ Błąd zmiany stanu zaworu:', error);
+                        alert(`Wystąpił błąd: ${error.message}. Spróbuj ponownie.`);
+                    });
             });
+
+
+
 
             $('.plc-checkbox').change(function () {
                 handleCheckboxChange(this);
@@ -145,9 +162,7 @@
             function sendDataToServer(section, index, field, value) {
                 fetch('/Irrigation/UpdateWeeklyTimeSwitch', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         section: section,
                         index: index,
@@ -181,3 +196,4 @@
         });
     </script>
 }
+
