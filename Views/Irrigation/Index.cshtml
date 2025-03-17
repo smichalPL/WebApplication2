@@ -82,10 +82,8 @@
             console.log("📢 Skrypt załadowany!");
 
             function updateValveStates() {
-                fetch('/Irrigation/UpdateValveState', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ index: index, state: newState })
+                fetch('/Irrigation/UpdateValveState', {  // 👈 Poprawiona składnia!
+                    method: 'POST'
                 })
                     .then(response => {
                         if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
@@ -117,7 +115,7 @@
             }
 
             // 🔹 Pierwsze pobranie danych
-            updateValveStates();
+           // updateValveStates();
 
             // 🔹 Obsługa kliknięcia przycisku
             $('.toggle-button').click(function () {
@@ -135,7 +133,7 @@
                         console.log('✅ Zmieniono stan zaworu.', data);
 
                         // 🔹 Odśwież stan zaworów po zmianie
-                        updateValveStates();
+                       // updateValveStates();
                     })
                     .catch(error => {
                         console.error('❌ Błąd zmiany stanu zaworu:', error);
