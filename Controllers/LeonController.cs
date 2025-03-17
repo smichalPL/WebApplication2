@@ -59,7 +59,7 @@ namespace WebApplication2.Controllers
                 model.facadeBlindsDownHMI = await _plcService.ReadVariableAsync<bool>("P_Leon.bFacadeBlindsDownHMI");
                 model.facadeBlindsStopHMI = await _plcService.ReadVariableAsync<bool>("P_Leon.bFacadeBlindsStopHMI");
                 model.lampRelayCeiling = await _plcService.ReadVariableAsync<bool>("GVL_IO.Y_LeonLampRelayCeiling");
-                model.windowOpenSensor = await _plcService.ReadVariableAsync<bool>("GVL_IO.X_LeonroomWindowOpenSensor");
+                model.windowOpenSensor = await _plcService.ReadVariableAsync<bool>("GVL_IO.X_LeonWindowOpenSensor");
             }
             catch (Exception ex)
             {

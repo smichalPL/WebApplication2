@@ -8,6 +8,7 @@
 <p>View room 1</p>
 <head>
     <link rel="stylesheet" href="~/css/style.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 
 <h2>Wartości z PLC</h2>
@@ -22,7 +23,9 @@
 
 <h2>Zapis danych do PLC</h2>
 
-<button id="toggle-bool-button" class="toggle-button-@Model.wallSocketHMI">Wall Socket</button>
+<button id="toggle-bool-button" class="toggle-button-wall-socket-@Model.wallSocketHMI">
+    <i class="fas fa-plug"></i> Wall Socket
+</button>
 <button id="toggle-blinds-up-button" class="toggle-button-@Model.facadeBlindsUpHMI">Blinds Up</button>
 <button id="toggle-blinds-down-button" class="toggle-button-@Model.facadeBlindsDownHMI">Blinds Down</button>
 <button id="toggle-blinds-stop-button" class="toggle-button-@Model.facadeBlindsStopHMI">Blinds Stop</button>
@@ -98,8 +101,16 @@
 
         function updateButtonColor(toggleButtonState, buttonId) {
             const button = document.getElementById(buttonId);
-            button.className = toggleButtonState ? 'toggle-button-true' : 'toggle-button-false';
+
+            button.classList.remove('toggle-button-wall-socket-true', 'toggle-button-wall-socket-false');
+
+            if (toggleButtonState) {
+                button.classList.add('toggle-button-wall-socket-true');
+            } else {
+                button.classList.add('toggle-button-wall-socket-false');
+            }
         }
+
 
         // Dodajemy obsługę zdarzeń dla nowego przycisku
         let momentaryButton = document.getElementById('momentary-lamp-button');

@@ -82,8 +82,19 @@
             console.log("📢 Skrypt załadowany!");
 
             function updateValveStates() {
-                fetch('/Irrigation/UpdateValveState')
-                    .then(response => response.json())
+                fetch('/Irrigation/UpdateValveState', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ index: index, state: newState })
+                })
+                    .then(response => {
+                        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                        return response.text(); // Pobierz odpowiedź jako tekst
+                    })
+                    .then(text => {
+                        if (!text) throw new Error("Odpowiedź serwera jest pusta!");
+                        return JSON.parse(text); // Spróbuj sparsować tekst jako JSON
+                    })
                     .then(data => {
                         console.log("🔄 Aktualizacja przycisków", data);
                         $('.toggle-button').each(function () {
@@ -101,6 +112,8 @@
                         });
                     })
                     .catch(error => console.error("❌ Błąd pobierania stanów zaworów:", error));
+
+
             }
 
             // 🔹 Pierwsze pobranie danych
@@ -192,7 +205,7 @@
                     console.log("🔄 Odświeżanie strony...");
                     location.reload();
                 }
-            }, 10000);
+            }, 100000);
         });
     </script>
 }

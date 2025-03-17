@@ -12,6 +12,7 @@ using TwinCAT.PlcOpen;
 
 namespace WebApplication2.Controllers
 {
+
     public class IrrigationController : Controller
     {
         private readonly PlcService _plcService;
@@ -197,6 +198,7 @@ namespace WebApplication2.Controllers
         {
             if (request == null || request.Index < 0 || request.Index >= 7)
             {
+                Console.WriteLine($"Otrzymano żądanie: Index={request.Index}, State={request.State}");
                 return BadRequest(new { error = "Invalid request" });
             }
 

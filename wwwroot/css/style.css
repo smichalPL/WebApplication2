@@ -42,6 +42,32 @@
     color: gray;
 }
 
+/* Stan W£¥CZONY (ON) */
+.toggle-button-wall-socket-true {
+    background-color: darkgray;
+    color: white;
+}
+
+/* Stan WY£¥CZONY (OFF) */
+.toggle-button-wall-socket-false {
+    background-color: lightgray;
+    color: black;
+}
+
+/* Animacja ikon */
+.toggle-button-wall-socket i {
+    transition: color 0.3s ease-in-out;
+}
+
+/* Specjalny kolor dla wallSocket, gdy jest w³¹czony */
+.toggle-button-wall-socket-true i {
+    color: red;
+}
+
+/* Specjalny kolor dla wallSocket, gdy jest wy³¹czony */
+.toggle-button-wall-socket-false i {
+    color: green;
+}
 
 #i-pressure-display {
     cursor: pointer;
