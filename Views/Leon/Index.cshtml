@@ -26,10 +26,19 @@
 <button id="toggle-bool-button" class="toggle-button-wall-socket-@Model.wallSocketHMI">
     <i class="fas fa-plug"></i> Wall Socket
 </button>
-<button id="toggle-blinds-up-button" class="toggle-button-@Model.facadeBlindsUpHMI">Blinds Up</button>
-<button id="toggle-blinds-down-button" class="toggle-button-@Model.facadeBlindsDownHMI">Blinds Down</button>
-<button id="toggle-blinds-stop-button" class="toggle-button-@Model.facadeBlindsStopHMI">Blinds Stop</button>
-<button id="momentary-lamp-button">Lamp Button</button>
+<button id="toggle-blinds-up-button">
+    <i id="blinds-up-icon" class="fas fa-angle-double-up"></i> Blinds Up
+</button>
+<button id="toggle-blinds-down-button">
+    <i id="blinds-down-icon" class="fas fa-angle-double-down"></i> Blinds Down
+</button>
+<button id="toggle-blinds-stop-button">
+    <i id="blinds-stop-icon" class="fas fa-stop-circle"></i> Blinds Stop
+</button>
+<button id="momentary-lamp-button">
+    <i id="lamp-icon" class="fas fa-lightbulb"></i> Lamp Button
+</button>
+
 
 @section Scripts {
     <script>
@@ -43,13 +52,27 @@
             document.getElementById('facade-blinds-up-display').textContent = data.facadeBlindsUpHMI;
             document.getElementById('facade-blinds-down-display').textContent = data.facadeBlindsDownHMI;
             document.getElementById('facade-blinds-stop-display').textContent = data.facadeBlindsStopHMI;
+            document.getElementById('lamp-relay-ceiling-display').textContent = data.lampRelayCeiling;
 
-            // Aktualizacja koloru przycisków
+            // Aktualizacja koloru ikonki lampy
+            updateLampIconColor(data.lampRelayCeiling);
+
             updateButtonColor(data.wallSocketHMI, 'toggle-bool-button');
             updateButtonColor(data.facadeBlindsUpHMI, 'toggle-blinds-up-button');
             updateButtonColor(data.facadeBlindsDownHMI, 'toggle-blinds-down-button');
             updateButtonColor(data.facadeBlindsStopHMI, 'toggle-blinds-stop-button');
         }
+
+        function updateLampIconColor(lampState) {
+            const lampIcon = document.getElementById('lamp-icon');
+
+            if (lampState) {
+                lampIcon.style.color = 'yellow'; // Lampa włączona - żółty kolor
+            } else {
+                lampIcon.style.color = 'gray'; // Lampa wyłączona - szary kolor
+            }
+        }
+
 
         setInterval(refresh, 2000);
 
