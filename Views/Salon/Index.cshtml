@@ -8,6 +8,7 @@
 <p>View room: Salon</p>
 <head>
     <link rel="stylesheet" href="~/css/style.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 
 <h2>Wartości z PLC</h2>
@@ -30,26 +31,59 @@
 <p>facadeBlindsStopHsRightHMI: <span id="facade-blinds-stop-hs-right-display">@Model.facadeBlindsStopHsRightHMI</span></p>
 <p>lampRelayCeiling1: <span id="lamp-relay-ceiling1-display">@Model.lampRelayCeiling1</span></p>
 <p>lampRelayCeiling2: <span id="lamp-relay-ceiling2-display">@Model.lampRelayCeiling2</span></p>
+<p>lampRelayCeiling3: <span id="lamp-relay-ceiling3-display">@Model.lampRelayCeiling3</span></p>
 <p>windowOpenSensor: <span id="window-open-sensor-display">@Model.windowOpenSensor</span></p>
 
 <h2>Zapis danych do PLC</h2>
 
-<button id="toggle-wall-socket1-button" class="toggle-button-@Model.wallSocket1HMI">Wall Socket 1</button>
-<button id="toggle-wall-socket2-button" class="toggle-button-@Model.wallSocket2HMI">Wall Socket 2</button>
-<button id="toggle-wall-socket3-button" class="toggle-button-@Model.wallSocket3HMI">Wall Socket 3</button>
-<button id="toggle-wall-socket4-button" class="toggle-button-@Model.wallSocket4HMI">Wall Socket 4</button>
-<button id="toggle-blinds-up-button" class="toggle-button-@Model.facadeBlindsUpHMI">Blinds Up</button>
-<button id="toggle-blinds-down-button" class="toggle-button-@Model.facadeBlindsDownHMI">Blinds Down</button>
-<button id="toggle-blinds-stop-button" class="toggle-button-@Model.facadeBlindsStopHMI">Blinds Stop</button>
-<button id="toggle-blinds-up-hs-left-button" class="toggle-button-@Model.facadeBlindsUpHsLeftHMI">Blinds Up HS Left</button>
-<button id="toggle-blinds-down-hs-left-button" class="toggle-button-@Model.facadeBlindsDownHsLeftHMI">Blinds Down HS Left</button>
-<button id="toggle-blinds-stop-hs-left-button" class="toggle-button-@Model.facadeBlindsStopHsLeftHMI">Blinds Stop HS Left</button>
-<button id="toggle-blinds-up-hs-right-button" class="toggle-button-@Model.facadeBlindsUpHsRightHMI">Blinds Up HS Right</button>
-<button id="toggle-blinds-down-hs-right-button" class="toggle-button-@Model.facadeBlindsDownHsRightHMI">Blinds Down HS Right</button>
-<button id="toggle-blinds-stop-hs-right-button" class="toggle-button-@Model.facadeBlindsStopHsRightHMI">Blinds Stop HS Right</button>
-<button id="momentary-lamp1-button" class="momentary-lamp-button">Lamp 1 Button</button>
-<button id="momentary-lamp2-button" class="momentary-lamp-button">Lamp 2 Button</button>
-<button id="momentary-lamp3-button" class="momentary-lamp-button">Lamp 3 Button</button>
+<button id="toggle-wall-socket1-button" class="toggle-button-wall-socket-@Model.wallSocket1HMI">
+    <i class="fas fa-plug"></i>Wall Socket 1
+</button>
+<button id="toggle-wall-socket2-button" class="toggle-button-wall-socket-@Model.wallSocket2HMI">
+    <i class="fas fa-plug"></i>Wall Socket 2
+</button>
+<button id="toggle-wall-socket3-button" class="toggle-button-wall-socket-@Model.wallSocket3HMI">
+    <i class="fas fa-plug"></i>Wall Socket 3
+</button>
+<button id="toggle-wall-socket4-button" class="toggle-button-wall-socket-@Model.wallSocket4HMI">
+    <i class="fas fa-plug"></i>Wall Socket 4
+</button>
+<button id="toggle-blinds-up-button">
+    <i id="blinds-up-icon" class="fas fa-angle-double-up"></i> Blinds Up
+</button>
+<button id="toggle-blinds-down-button">
+    <i id="blinds-down-icon" class="fas fa-angle-double-down"></i> Blinds Down
+</button>
+<button id="toggle-blinds-stop-button">
+    <i id="blinds-stop-icon" class="fas fa-stop-circle"></i> Blinds Stop
+</button>
+<button id="toggle-blinds-up-hs-left-button">
+    <i id="blinds-up-hs-left-icon" class="fas fa-angle-double-up"></i>Blinds HS Left
+</button>
+<button id="toggle-blinds-down-hs-left-button">
+    <i id="blinds-down-hs-left-icon" class="fas fa-angle-double-down"></i>Blinds HS Left
+</button>
+<button id="toggle-blinds-stop-hs-left-button">
+    <i id="blinds-stop-hs-left-icon" class="fas fa-stop-circle"></i>Blinds HS Left
+</button>
+<button id="toggle-blinds-up-hs-right-button">
+    <i id="blinds-up-hs-right-icon" class="fas fa-angle-double-up"></i>Blinds HS Right
+</button>
+<button id="toggle-blinds-down-hs-right-button">
+    <i id="blinds-down-hs-right-icon" class="fas fa-angle-double-down"></i>Blinds HS Right
+</button>
+<button id="toggle-blinds-stop-hs-right-button">
+    <i id="blinds-stop-hs-right-icon" class="fas fa-stop-circle"></i>Blinds HS Right
+</button>
+<button id="momentary-lamp1-button">
+    <i id="lamp1-icon" class="fas fa-lightbulb"></i> Lamp 1 Button
+</button>
+<button id="momentary-lamp2-button">
+    <i id="lamp2-icon" class="fas fa-lightbulb"></i> Lamp 2 Button
+</button>
+<button id="momentary-lamp3-button">
+    <i id="lamp3-icon" class="fas fa-lightbulb"></i> Lamp 3 Button
+</button>
 
 
 @section Scripts {
@@ -57,6 +91,7 @@
         async function refresh() {
             const request = await fetch('/salon/json');
             const data = await request.json();
+
 
             console.log('Nasze dane', data);
             document.getElementById('lamp-switch1-display').textContent = data.lampSwitch1HMI;
@@ -77,7 +112,13 @@
             document.getElementById('facade-blinds-stop-hs-right-display').textContent = data.facadeBlindsStopHsRightHMI;
             document.getElementById('lamp-relay-ceiling1-display').textContent = data.lampRelayCeiling1;
             document.getElementById('lamp-relay-ceiling2-display').textContent = data.lampRelayCeiling2;
+            document.getElementById('lamp-relay-ceiling3-display').textContent = data.lampRelayCeiling3;
             document.getElementById('window-open-sensor-display').textContent = data.windowOpenSensor;
+
+            // Aktualizacja koloru ikonki lampy
+            updateLampIconColor(data.lampRelayCeiling1, 'lamp1-icon');
+            updateLampIconColor(data.lampRelayCeiling2, 'lamp2-icon');
+            updateLampIconColor(data.lampRelayCeiling3, 'lamp3-icon');
 
             updateButtonColor(data.wallSocket1HMI, 'toggle-wall-socket1-button');
             updateButtonColor(data.wallSocket2HMI, 'toggle-wall-socket2-button');
@@ -94,6 +135,15 @@
             updateButtonColor(data.facadeBlindsStopHsRightHMI, 'toggle-blinds-stop-hs-right-button');
         }
 
+        function updateLampIconColor(lampState, lampIconId) {
+            const lampIcon = document.getElementById(lampIconId);
+
+            if (lampState) {
+                lampIcon.style.color = 'yellow'; // Lampa włączona - żółty kolor
+            } else {
+                lampIcon.style.color = 'gray'; // Lampa wyłączona - szary kolor
+            }
+        }
         setInterval(refresh, 2000);
 
         document.getElementById('toggle-wall-socket1-button').addEventListener('click', async () => {
