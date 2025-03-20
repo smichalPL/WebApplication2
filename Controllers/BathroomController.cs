@@ -58,7 +58,7 @@ namespace WebApplication2.Controllers
                 model.facadeBlindsUpHMI = await _plcService.ReadVariableAsync<bool>("P_Bathroom.bFacadeBlindsUpHMI");
                 model.facadeBlindsDownHMI = await _plcService.ReadVariableAsync<bool>("P_Bathroom.bFacadeBlindsDownHMI");
                 model.facadeBlindsStopHMI = await _plcService.ReadVariableAsync<bool>("P_Bathroom.bFacadeBlindsStopHMI");
-                model.lampRelayCeiling = await _plcService.ReadVariableAsync<bool>("GVL_IO.Y_BathroomLampRelayCeiling");
+                model.lampRelayCeiling = await _plcService.ReadVariableAsync<bool>("GVL_IO.Y_BathroomLampRelayMirror");
                 model.windowOpenSensor = await _plcService.ReadVariableAsync<bool>("GVL_IO.X_BathroomWindowOpenSensor");
             }
             catch (Exception ex)

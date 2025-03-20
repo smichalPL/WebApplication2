@@ -124,14 +124,7 @@
 
         function updateButtonColor(toggleButtonState, buttonId) {
             const button = document.getElementById(buttonId);
-
-            button.classList.remove('toggle-button-wall-socket-true', 'toggle-button-wall-socket-false');
-
-            if (toggleButtonState) {
-                button.classList.add('toggle-button-wall-socket-true');
-            } else {
-                button.classList.add('toggle-button-wall-socket-false');
-            }
+            button.className = toggleButtonState ? 'toggle-button-true' : 'toggle-button-false';
         }
 
 

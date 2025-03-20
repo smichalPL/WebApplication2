@@ -35,7 +35,7 @@ namespace PlcVariableReader
             { "P_Bathroom.bFacadeBlindsDownHMI", typeof(bool) },
             { "P_Bathroom.bFacadeBlindsStopHMI", typeof(bool) },
             { "GVL_IO.X_BathroomWindowOpenSensor", typeof(bool) },
-            { "GVL_IO.Y_BathroomLampRelayCeiling", typeof(bool) },
+            { "GVL_IO.Y_BathroomLampRelayMirror", typeof(bool) },
 
             { "P_Olek.bLampSwitchLeftHMI", typeof(bool) },
             { "P_Olek.bWallSocketHMI", typeof(bool) },
