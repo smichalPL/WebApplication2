@@ -8,25 +8,44 @@
 <p>View room: Outdoor</p>
 <head>
     <link rel="stylesheet" href="~/css/style.css" />
+    <link rel="stylesheet" href="~/lib/font-awesome/css/all.min.css">
 </head>
 
-<h2>Wartości z PLC</h2>
+<div>
+    <label>
+        <input type="checkbox" id="toggle-plc-data" /> Pokaż/Ukryj Dane PLC
+    </label>
+</div>
 
-<p>lampSwitch1HMI: <span id="lamp-switch1-display">@Model.lampSwitch1HMI</span></p>
-<p>lampSwitch2HMI: <span id="lamp-switch2-display">@Model.lampSwitch2HMI</span></p>
-<p>wallSocket1HMI: <span id="wall-socket1-display">@Model.wallSocket1HMI</span></p>
-<p>wallSocket2HMI: <span id="wall-socket2-display">@Model.wallSocket2HMI</span></p>
-<p>wallSocket3HMI: <span id="wall-socket3-display">@Model.wallSocket3HMI</span></p>
-<p>lampRelayCeiling1: <span id="lamp-relay-ceiling1-display">@Model.lampRelayCeiling1</span></p>
-<p>lampRelayCeiling2: <span id="lamp-relay-ceiling2-display">@Model.lampRelayCeiling2</span></p>
+<div id="plc-data-section">
+    <h2>Wartości z PLC</h2>
+
+    <p>lampSwitch1HMI: <span id="lamp-switch1-display">@Model.lampSwitch1HMI</span></p>
+    <p>lampSwitch2HMI: <span id="lamp-switch2-display">@Model.lampSwitch2HMI</span></p>
+    <p>wallSocket1HMI: <span id="wall-socket1-display">@Model.wallSocket1HMI</span></p>
+    <p>wallSocket2HMI: <span id="wall-socket2-display">@Model.wallSocket2HMI</span></p>
+    <p>wallSocket3HMI: <span id="wall-socket3-display">@Model.wallSocket3HMI</span></p>
+    <p>lampRelayCeiling1: <span id="lamp-relay-ceiling1-display">@Model.lampRelayCeiling1</span></p>
+    <p>lampRelayCeiling2: <span id="lamp-relay-ceiling2-display">@Model.lampRelayCeiling2</span></p>
+</div>
 
 <h2>Zapis danych do PLC</h2>
 
-<button id="toggle-wall-socket1-button" class="toggle-button-@Model.wallSocket1HMI">Wall Socket 1</button>
-<button id="toggle-wall-socket2-button" class="toggle-button-@Model.wallSocket2HMI">Wall Socket 2</button>
-<button id="toggle-wall-socket3-button" class="toggle-button-@Model.wallSocket3HMI">Wall Socket 3</button>
-<button id="momentary-lamp1-button" class="momentary-lamp-button">Lamp 1 Button</button>
-<button id="momentary-lamp2-button" class="momentary-lamp-button">Lamp 2 Button</button>
+<button id="toggle-wall-socket1-button" class="toggle-button-wall-socket-@Model.wallSocket1HMI">
+    <i class="fas fa-plug"></i>Wall Socket 1
+</button>
+<button id="toggle-wall-socket2-button" class="toggle-button-wall-socket-@Model.wallSocket2HMI">
+    <i class="fas fa-plug"></i>Wall Socket 2
+</button>
+<button id="toggle-wall-socket3-button" class="toggle-button-wall-socket-@Model.wallSocket3HMI">
+    <i class="fas fa-plug"></i>Wall Socket 3
+</button>
+<button id="momentary-lamp1-button">
+    <i id="lamp1-icon" class="fas fa-lightbulb"></i> Lamp 1 Button
+</button>
+<button id="momentary-lamp2-button">
+    <i id="lamp2-icon" class="fas fa-lightbulb"></i> Lamp 2 Button
+</button>
 
 
 @section Scripts {
@@ -44,11 +63,24 @@
             document.getElementById('lamp-relay-ceiling1-display').textContent = data.lampRelayCeiling1;
             document.getElementById('lamp-relay-ceiling2-display').textContent = data.lampRelayCeiling2;
 
+            // Aktualizacja koloru ikonki lampy
+            updateLampIconColor(data.lampRelayCeiling1, 'lamp1-icon');
+            updateLampIconColor(data.lampRelayCeiling2, 'lamp2-icon');
+
             updateButtonColor(data.wallSocket1HMI, 'toggle-wall-socket1-button');
             updateButtonColor(data.wallSocket2HMI, 'toggle-wall-socket2-button');
             updateButtonColor(data.wallSocket3HMI, 'toggle-wall-socket3-button');
         }
 
+        function updateLampIconColor(lampState, lampIconId) {
+            const lampIcon = document.getElementById(lampIconId);
+
+            if (lampState) {
+                lampIcon.style.color = 'yellow'; // Lampa włączona - żółty kolor
+            } else {
+                lampIcon.style.color = 'gray'; // Lampa wyłączona - szary kolor
+            }
+        }
         setInterval(refresh, 2000);
 
         document.getElementById('toggle-wall-socket1-button').addEventListener('click', async () => {
@@ -264,6 +296,33 @@
             momentaryButton2.addEventListener('touchend', () => {
                 momentaryButton2.classList.remove('pressed');
             });
+
+        // Zapamiętać ostatni stan checkboxa i przywrócić go po odświeżeniu strony,
+        const toggleCheckbox = document.getElementById('toggle-plc-data');
+        const plcDataSection = document.getElementById('plc-data-section');
+
+        // Funkcja do zapisywania stanu checkboxa w localStorage
+        function saveCheckboxState() {
+            localStorage.setItem('plcDataVisible', toggleCheckbox.checked);
+        }
+
+        // Funkcja do odczytywania stanu checkboxa z localStorage
+        function loadCheckboxState() {
+            const isVisible = localStorage.getItem('plcDataVisible');
+            if (isVisible !== null) {
+                toggleCheckbox.checked = isVisible === 'true';
+                plcDataSection.style.display = toggleCheckbox.checked ? 'block' : 'none';
+            }
+        }
+
+        // Nasłuchiwanie zmiany stanu checkboxa i zapisywanie go
+        toggleCheckbox.addEventListener('change', function () {
+            plcDataSection.style.display = this.checked ? 'block' : 'none';
+            saveCheckboxState();
+        });
+
+        // Ładowanie stanu checkboxa po załadowaniu strony
+        document.addEventListener('DOMContentLoaded', loadCheckboxState)
 
     </script>
 }

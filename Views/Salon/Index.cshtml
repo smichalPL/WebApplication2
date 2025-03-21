@@ -11,27 +11,35 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 
-<h2>Wartości z PLC</h2>
+<div>
+    <label>
+        <input type="checkbox" id="toggle-plc-data" /> Pokaż/Ukryj Dane PLC
+    </label>
+</div>
 
-<p>lampSwitch1HMI: <span id="lamp-switch1-display">@Model.lampSwitch1HMI</span></p>
-<p>lampSwitch2HMI: <span id="lamp-switch2-display">@Model.lampSwitch2HMI</span></p>
-<p>lampSwitch3HMI: <span id="lamp-switch3-display">@Model.lampSwitch3HMI</span></p>
-<p>wallSocket1HMI: <span id="wall-socket1-display">@Model.wallSocket1HMI</span></p>
-<p>wallSocket2HMI: <span id="wall-socket2-display">@Model.wallSocket2HMI</span></p>
-<p>wallSocket3HMI: <span id="wall-socket3-display">@Model.wallSocket3HMI</span></p>
-<p>wallSocket4HMI: <span id="wall-socket4-display">@Model.wallSocket4HMI</span></p>
-<p>facadeBlindsUpHMI: <span id="facade-blinds-up-display">@Model.facadeBlindsUpHMI</span></p>
-<p>facadeBlindsDownHMI: <span id="facade-blinds-down-display">@Model.facadeBlindsDownHMI</span></p>
-<p>facadeBlindsStopHMI: <span id="facade-blinds-stop-display">@Model.facadeBlindsStopHMI</span></p>
-<p>facadeBlindsUpHsLeftHMI: <span id="facade-blinds-up-hs-left-display">@Model.facadeBlindsUpHsLeftHMI</span></p>
-<p>facadeBlindsDownHsLeftHMI: <span id="facade-blinds-down-hs-left-display">@Model.facadeBlindsDownHsLeftHMI</span></p>
-<p>facadeBlindsStopHsLeftHMI: <span id="facade-blinds-stop-hs-left-display">@Model.facadeBlindsStopHsLeftHMI</span></p>
-<p>facadeBlindsUpHsRightHMI: <span id="facade-blinds-up-hs-right-display">@Model.facadeBlindsUpHsRightHMI</span></p>
-<p>facadeBlindsDownHsRightHMI: <span id="facade-blinds-down-hs-right-display">@Model.facadeBlindsDownHsRightHMI</span></p>
-<p>facadeBlindsStopHsRightHMI: <span id="facade-blinds-stop-hs-right-display">@Model.facadeBlindsStopHsRightHMI</span></p>
-<p>lampRelayCeiling1: <span id="lamp-relay-ceiling1-display">@Model.lampRelayCeiling1</span></p>
-<p>lampRelayCeiling2: <span id="lamp-relay-ceiling2-display">@Model.lampRelayCeiling2</span></p>
-<p>windowOpenSensor: <span id="window-open-sensor-display">@Model.windowOpenSensor</span></p>
+<div id="plc-data-section">
+    <h2>Wartości z PLC</h2>
+
+    <p>lampSwitch1HMI: <span id="lamp-switch1-display">@Model.lampSwitch1HMI</span></p>
+    <p>lampSwitch2HMI: <span id="lamp-switch2-display">@Model.lampSwitch2HMI</span></p>
+    <p>lampSwitch3HMI: <span id="lamp-switch3-display">@Model.lampSwitch3HMI</span></p>
+    <p>wallSocket1HMI: <span id="wall-socket1-display">@Model.wallSocket1HMI</span></p>
+    <p>wallSocket2HMI: <span id="wall-socket2-display">@Model.wallSocket2HMI</span></p>
+    <p>wallSocket3HMI: <span id="wall-socket3-display">@Model.wallSocket3HMI</span></p>
+    <p>wallSocket4HMI: <span id="wall-socket4-display">@Model.wallSocket4HMI</span></p>
+    <p>facadeBlindsUpHMI: <span id="facade-blinds-up-display">@Model.facadeBlindsUpHMI</span></p>
+    <p>facadeBlindsDownHMI: <span id="facade-blinds-down-display">@Model.facadeBlindsDownHMI</span></p>
+    <p>facadeBlindsStopHMI: <span id="facade-blinds-stop-display">@Model.facadeBlindsStopHMI</span></p>
+    <p>facadeBlindsUpHsLeftHMI: <span id="facade-blinds-up-hs-left-display">@Model.facadeBlindsUpHsLeftHMI</span></p>
+    <p>facadeBlindsDownHsLeftHMI: <span id="facade-blinds-down-hs-left-display">@Model.facadeBlindsDownHsLeftHMI</span></p>
+    <p>facadeBlindsStopHsLeftHMI: <span id="facade-blinds-stop-hs-left-display">@Model.facadeBlindsStopHsLeftHMI</span></p>
+    <p>facadeBlindsUpHsRightHMI: <span id="facade-blinds-up-hs-right-display">@Model.facadeBlindsUpHsRightHMI</span></p>
+    <p>facadeBlindsDownHsRightHMI: <span id="facade-blinds-down-hs-right-display">@Model.facadeBlindsDownHsRightHMI</span></p>
+    <p>facadeBlindsStopHsRightHMI: <span id="facade-blinds-stop-hs-right-display">@Model.facadeBlindsStopHsRightHMI</span></p>
+    <p>lampRelayCeiling1: <span id="lamp-relay-ceiling1-display">@Model.lampRelayCeiling1</span></p>
+    <p>lampRelayCeiling2: <span id="lamp-relay-ceiling2-display">@Model.lampRelayCeiling2</span></p>
+    <p>windowOpenSensor: <span id="window-open-sensor-display">@Model.windowOpenSensor</span></p>
+</div>
 
 <h2>Zapis danych do PLC</h2>
 
@@ -393,88 +401,33 @@
                 momentaryButton2.classList.remove('pressed');
             });
 
-            // Momentary Button 3
 
-            let momentaryButton3 = document.getElementById('momentary-lamp3-button');
-            let isMomentaryButton3Pressed = false;
-            let momentaryButton3Interval;
+        // Zapamiętać ostatni stan checkboxa i przywrócić go po odświeżeniu strony,
+        const toggleCheckbox = document.getElementById('toggle-plc-data');
+        const plcDataSection = document.getElementById('plc-data-section');
 
-            momentaryButton3.addEventListener('mousedown', () => {
-                isMomentaryButton3Pressed = true;
-                setVariable3To1();
+        // Funkcja do zapisywania stanu checkboxa w localStorage
+        function saveCheckboxState() {
+            localStorage.setItem('plcDataVisible', toggleCheckbox.checked);
+        }
 
-                momentaryButton3Interval = setInterval(() => {
-                    if (isMomentaryButton3Pressed) {
-                        setVariable3To1();
-                    }
-                }, 100);
-            });
-
-            momentaryButton3.addEventListener('mouseup', () => {
-                isMomentaryButton3Pressed = false;
-                setVariable3To0();
-                clearInterval(momentaryButton3Interval);
-            });
-
-            momentaryButton3.addEventListener('touchstart', () => {
-                isMomentaryButton3Pressed = true;
-                setVariable3To1();
-
-                momentaryButton3Interval = setInterval(() => {
-                    if (isMomentaryButton3Pressed) {
-                        setVariable3To1();
-                    }
-                }, 100);
-            });
-
-            momentaryButton3.addEventListener('touchend', () => {
-                isMomentaryButton3Pressed = false;
-                setVariable3To0();
-                clearInterval(momentaryButton3Interval);
-            });
-
-            async function setVariable3To1() {
-                try {
-                    await fetch('/salon/SetMomentarySwitch3ToTrue', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({})
-                    });
-                } catch (error) {
-                    console.error('Błąd podczas ustawiania zmiennej 3 na 1:', error);
-                }
+        // Funkcja do odczytywania stanu checkboxa z localStorage
+        function loadCheckboxState() {
+            const isVisible = localStorage.getItem('plcDataVisible');
+            if (isVisible !== null) {
+                toggleCheckbox.checked = isVisible === 'true';
+                plcDataSection.style.display = toggleCheckbox.checked ? 'block' : 'none';
             }
+        }
 
-            async function setVariable3To0() {
-                try {
-                    await fetch('/salon/SetMomentarySwitch3ToFalse', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({})
-                    });
-                } catch (error) {
-                    console.error('Błąd podczas ustawiania zmiennej 3 na 0:', error);
-                }
-            }
+        // Nasłuchiwanie zmiany stanu checkboxa i zapisywanie go
+        toggleCheckbox.addEventListener('change', function () {
+            plcDataSection.style.display = this.checked ? 'block' : 'none';
+            saveCheckboxState();
+        });
 
-            momentaryButton3.addEventListener('mousedown', () => {
-                momentaryButton3.classList.add('pressed');
-            });
+        // Ładowanie stanu checkboxa po załadowaniu strony
+        document.addEventListener('DOMContentLoaded', loadCheckboxState)
 
-            momentaryButton3.addEventListener('mouseup', () => {
-                momentaryButton3.classList.remove('pressed');
-            });
-
-            momentaryButton3.addEventListener('touchstart', () => {
-                momentaryButton3.classList.add('pressed');
-            });
-
-            momentaryButton3.addEventListener('touchend', () => {
-                momentaryButton3.classList.remove('pressed');
-            });
     </script>
-    }
+   }

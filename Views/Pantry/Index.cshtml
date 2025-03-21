@@ -8,18 +8,25 @@
 <p>View room 1</p>
 <head>
     <link rel="stylesheet" href="~/css/style.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="~/lib/font-awesome/css/all.min.css">
 </head>
 
-<h2>Wartości z PLC</h2>
+<div>
+    <label>
+        <input type="checkbox" id="toggle-plc-data" /> Pokaż/Ukryj Dane PLC
+    </label>
+</div>
+<div id="plc-data-section">
+    <h2>Wartości z PLC</h2>
 
-<p>lampSwitch: <span id="lamp-switch-display">@Model.lampSwitchHMI</span></p>
-<p>wallSocket: <span id="wall-socket-display">@Model.wallSocketHMI</span></p>
-<p>facadeBlindsUp: <span id="facade-blinds-up-display">@Model.facadeBlindsUpHMI</span></p>
-<p>facadeBlindsDown: <span id="facade-blinds-down-display">@Model.facadeBlindsDownHMI</span></p>
-<p>facadeBlindsStop: <span id="facade-blinds-stop-display">@Model.facadeBlindsStopHMI</span></p>
-<p>lampRelayCeiling: <span id="lamp-relay-ceiling-display">@Model.lampRelayCeiling</span></p>
-<p>windowOpenSensor: <span id="window-open-sensor-display">@Model.windowOpenSensor</span></p>
+    <p>lampSwitch: <span id="lamp-switch-display">@Model.lampSwitchHMI</span></p>
+    <p>wallSocket: <span id="wall-socket-display">@Model.wallSocketHMI</span></p>
+    <p>facadeBlindsUp: <span id="facade-blinds-up-display">@Model.facadeBlindsUpHMI</span></p>
+    <p>facadeBlindsDown: <span id="facade-blinds-down-display">@Model.facadeBlindsDownHMI</span></p>
+    <p>facadeBlindsStop: <span id="facade-blinds-stop-display">@Model.facadeBlindsStopHMI</span></p>
+    <p>lampRelayCeiling: <span id="lamp-relay-ceiling-display">@Model.lampRelayCeiling</span></p>
+    <p>windowOpenSensor: <span id="window-open-sensor-display">@Model.windowOpenSensor</span></p>
+</div>
 
 <h2>Zapis danych do PLC</h2>
 
@@ -208,5 +215,32 @@
         momentaryButton.addEventListener('touchend', () => {
             momentaryButton.classList.remove('pressed');
         });
+        // Zapamiętać ostatni stan checkboxa i przywrócić go po odświeżeniu strony,
+        const toggleCheckbox = document.getElementById('toggle-plc-data');
+        const plcDataSection = document.getElementById('plc-data-section');
+
+        // Funkcja do zapisywania stanu checkboxa w localStorage
+        function saveCheckboxState() {
+            localStorage.setItem('plcDataVisible', toggleCheckbox.checked);
+        }
+
+        // Funkcja do odczytywania stanu checkboxa z localStorage
+        function loadCheckboxState() {
+            const isVisible = localStorage.getItem('plcDataVisible');
+            if (isVisible !== null) {
+                toggleCheckbox.checked = isVisible === 'true';
+                plcDataSection.style.display = toggleCheckbox.checked ? 'block' : 'none';
+            }
+        }
+
+        // Nasłuchiwanie zmiany stanu checkboxa i zapisywanie go
+        toggleCheckbox.addEventListener('change', function () {
+            plcDataSection.style.display = this.checked ? 'block' : 'none';
+            saveCheckboxState();
+        });
+
+        // Ładowanie stanu checkboxa po załadowaniu strony
+        document.addEventListener('DOMContentLoaded', loadCheckboxState)
+
     </script>
 }
