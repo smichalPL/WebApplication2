@@ -21,7 +21,6 @@ namespace WebApplication2.Models
         public bool facadeBlindsStopHsRightHMI { get; set; }
         public bool lampRelayCeiling1 { get; set; }
         public bool lampRelayCeiling2 { get; set; }
-        public bool lampRelayCeiling3 { get; set; }
         public bool windowOpenSensor{ get; set; }
     }
 }

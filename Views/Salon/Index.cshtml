@@ -31,7 +31,6 @@
 <p>facadeBlindsStopHsRightHMI: <span id="facade-blinds-stop-hs-right-display">@Model.facadeBlindsStopHsRightHMI</span></p>
 <p>lampRelayCeiling1: <span id="lamp-relay-ceiling1-display">@Model.lampRelayCeiling1</span></p>
 <p>lampRelayCeiling2: <span id="lamp-relay-ceiling2-display">@Model.lampRelayCeiling2</span></p>
-<p>lampRelayCeiling3: <span id="lamp-relay-ceiling3-display">@Model.lampRelayCeiling3</span></p>
 <p>windowOpenSensor: <span id="window-open-sensor-display">@Model.windowOpenSensor</span></p>
 
 <h2>Zapis danych do PLC</h2>
@@ -81,9 +80,6 @@
 <button id="momentary-lamp2-button">
     <i id="lamp2-icon" class="fas fa-lightbulb"></i> Lamp 2 Button
 </button>
-<button id="momentary-lamp3-button">
-    <i id="lamp3-icon" class="fas fa-lightbulb"></i> Lamp 3 Button
-</button>
 
 
 @section Scripts {
@@ -112,13 +108,11 @@
             document.getElementById('facade-blinds-stop-hs-right-display').textContent = data.facadeBlindsStopHsRightHMI;
             document.getElementById('lamp-relay-ceiling1-display').textContent = data.lampRelayCeiling1;
             document.getElementById('lamp-relay-ceiling2-display').textContent = data.lampRelayCeiling2;
-            document.getElementById('lamp-relay-ceiling3-display').textContent = data.lampRelayCeiling3;
             document.getElementById('window-open-sensor-display').textContent = data.windowOpenSensor;
 
             // Aktualizacja koloru ikonki lampy
             updateLampIconColor(data.lampRelayCeiling1, 'lamp1-icon');
             updateLampIconColor(data.lampRelayCeiling2, 'lamp2-icon');
-            updateLampIconColor(data.lampRelayCeiling3, 'lamp3-icon');
 
             updateButtonColor(data.wallSocket1HMI, 'toggle-wall-socket1-button');
             updateButtonColor(data.wallSocket2HMI, 'toggle-wall-socket2-button');
